@@ -117,7 +117,7 @@ void GamePlayer::render(olc::PixelGameEngine* pge) {
 	
 	float dx = (coords.x * GAME_GRID_PX_SIZE_X + 50 * std::sin(fAngle));
 	float dy = (coords.y * GAME_GRID_PX_SIZE_Y + 50 * std::cos(fAngle));
-	olc::vf2d fd = { dx, dy };q
+	olc::vf2d fd = { dx, dy };
 	// Draw vector
 	pge->DrawLineDecal({ coords.x * GAME_GRID_PX_SIZE_X, coords.y * GAME_GRID_PX_SIZE_Y }, fd, olc::YELLOW);
 
