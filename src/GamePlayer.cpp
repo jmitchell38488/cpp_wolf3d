@@ -1,5 +1,6 @@
 #include "GamePlayer.h"
 #include "Definitions.h"
+#include "GameEngine.h"
 #include <olcPixelGameEngine.h>
 
 #define DEGS_TO_RADS(x) (x * M_DEG_RAD)
@@ -9,6 +10,11 @@
 #define RAD_NORM DEGS_TO_RADS(1)
 
 GamePlayer::GamePlayer() {
+	coords = { 1.5, 5 };
+	fAngle = 0.0f;
+}
+
+GamePlayer::GamePlayer(GameEngine * engine) : gEngine(engine) {
 	coords = { 1.5, 5 };
 	fAngle = 0.0f;
 }
@@ -89,8 +95,7 @@ void GamePlayer::movement(float fElapsedTime) {
 	}
 
 	// Normalise
-	coords.x += dx * PLAYER_SPEED * fElapsedTime;
-	coords.y += dy * PLAYER_SPEED * fElapsedTime;
+	updatePlayerPositionWithWallDetection(dx * PLAYER_SPEED * fElapsedTime, dy * PLAYER_SPEED * fElapsedTime);
 
 	//fAngle = std::fmod(fAngle, 2 * M_PI);
 }
@@ -153,4 +158,14 @@ std::string  GamePlayer::moveDirToStr(PlayerMovDir pMove) {
 void GamePlayer::reset() {
 	coords = { 1.5, 5 };
 	fAngle = 0.0f;
+}
+
+bool GamePlayer::checkWall(olc::vi2d vec) {
+	return gEngine->gMap->checkIntercept(vec);
+}
+
+void GamePlayer::updatePlayerPositionWithWallDetection(float dx, float dy) {
+	auto vec = posPlayer();
+	if (!checkWall({ (int)(vec.x + dx), (int)(vec.y) })) coords.x += dx;
+	if (!checkWall({ (int)(vec.x), (int)(vec.y + dy) })) coords.y += dy;
 }

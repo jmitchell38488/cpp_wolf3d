@@ -58,7 +58,7 @@ void GameEngine::resetGame() {
 
 bool GameEngine::initialise(olc::PixelGameEngine* engine) {
 	gMap = std::make_unique<GameMap>(initialise_map());
-	gPlayer = std::make_unique<GamePlayer>();
+	gPlayer = std::make_unique<GamePlayer>(this);
 	pge = engine;
 
 	return true;

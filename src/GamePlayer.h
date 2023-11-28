@@ -10,14 +10,17 @@ enum class PlayerMovDir {
 	BKDIAGLEFT, BKDIAGRIGHT // (20+) 27, 28, 
 };
 
+class GameEngine;
+
 class GamePlayer {
 protected:
 	olc::vf2d coords;
-	float fAngle;
-	PlayerMovDir pMove;
+	float fAngle = 0.0f;
+	PlayerMovDir pMove{ 0 };
 
 public:
 	GamePlayer();
+	GamePlayer(GameEngine* engine);
 
 public:
 	void update(float fElapsedTime, PlayerMovDir moveDir);
@@ -25,10 +28,15 @@ public:
 	olc::vi2d posMap();
 	void render(olc::PixelGameEngine* pge);
 	void reset();
+	bool checkWall(olc::vi2d vec);
+	void updatePlayerPositionWithWallDetection(float dx, float dy);
 
 protected:
 	void movement(float fElapsedTime);
 	std::string moveDirToStr(PlayerMovDir pMove);
+
+private:
+	GameEngine* gEngine = nullptr;
 };
 
 #endif // GAME_PLAYER

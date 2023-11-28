@@ -34,6 +34,9 @@ public:
 	void resetGame();
 	bool initialise(olc::PixelGameEngine* engine);
 	float getRunTime();
+
+private:
+	friend class GamePlayer;
 };
 
 #endif // GAME_ENGINE
