@@ -16,11 +16,11 @@ olcLauncher::~olcLauncher() {
 }
 
 bool olcLauncher::OnUserCreate() {
-	return gEngine->initialise();
+	return gEngine->initialise(this);
 }
 
 bool olcLauncher::OnUserUpdate(float fElapsedTime) {
-	return gEngine->update(fElapsedTime, this);
+	return gEngine->update(fElapsedTime);
 }
 
 void olcLauncher::run() {

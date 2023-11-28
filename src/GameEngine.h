@@ -17,20 +17,22 @@ protected:
 	float fAccumulatedTime;
 	std::vector<olc::Pixel> pixels;
 	std::unique_ptr<GameMap> gMap = nullptr;
-	GamePlayer* gPlayer;
+	std::unique_ptr<GamePlayer> gPlayer = nullptr;
+	olc::PixelGameEngine* pge = nullptr;
 
 public:
 	GameEngine();
 
 public:
-	void handleInput(float fElapsedTime, olc::PixelGameEngine* pge);
-	void doGameUpdate(float fElapsedTime, olc::PixelGameEngine* pge);
-	bool update(float fElapsedTime, olc::PixelGameEngine * pge);
-	void render(olc::PixelGameEngine* pge);
+	void handleInput(float fElapsedTime);
+	void doGameUpdate(float fElapsedTime);
+	bool update(float fElapsedTime);
+	void render();
+	PlayerMovDir getPlayerMoveDir();
 
 public:
 	void resetGame();
-	bool initialise();
+	bool initialise(olc::PixelGameEngine* engine);
 	float getRunTime();
 };
 
