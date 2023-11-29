@@ -150,6 +150,7 @@
     <ClCompile Include="main.cpp" />
     <ClCompile Include="olcLauncher.cpp" />
     <ClCompile Include="olcPixelGameEngine.cpp" />
+    <ClCompile Include="Raycaster.cpp" />
     <ClCompile Include="Scene.cpp" />
   </ItemGroup>
   <ItemGroup>
@@ -160,6 +161,7 @@
     <ClInclude Include="GameMap.h" />
     <ClInclude Include="GamePlayer.h" />
     <ClInclude Include="olcLauncher.h" />
+    <ClInclude Include="Raycaster.h" />
     <ClInclude Include="Scene.h" />
     <ClInclude Include="Settings.h" />
   </ItemGroup>

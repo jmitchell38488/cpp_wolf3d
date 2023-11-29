@@ -114,26 +114,29 @@ olc::vi2d GamePlayer::posMap() {
 }
 
 void GamePlayer::render(olc::PixelGameEngine* pge) {
+	olc::Pixel cVector = olc::YELLOW;
+	if (gEngine->bDrawRays)
+		cVector = olc::BLACK;
+
 	float fMaxRads = M_RAD_DEGS_360 / 2;
 	float fAngleX = fAngle > fMaxRads ? (0 - fAngle) + fMaxRads : fAngle; // (-180 degs 180 degs)
 	float fVectAngle = fAngleX / fMaxRads;
 	float fY = std::cos(fVectAngle);
 	float fX = std::sin(fVectAngle);
-	
+
 	float dx = (coords.x * GAME_GRID_PX_SIZE_X + 50 * std::sin(fAngle));
 	float dy = (coords.y * GAME_GRID_PX_SIZE_Y + 50 * std::cos(fAngle));
 	olc::vf2d fd = { dx, dy };
 	// Draw vector
-	pge->DrawLineDecal({ coords.x * GAME_GRID_PX_SIZE_X, coords.y * GAME_GRID_PX_SIZE_Y }, fd, olc::YELLOW);
+	pge->DrawLineDecal({ coords.x * GAME_GRID_PX_SIZE_X, coords.y * GAME_GRID_PX_SIZE_Y }, fd, cVector);
 
 	dx = fd.x - 5 * std::sin(fAngle - DEGS_TO_RADS(45));
 	dy = fd.y - 5 * std::cos(fAngle - DEGS_TO_RADS(45));
-	pge->DrawLineDecal(fd, { dx, dy }, olc::YELLOW);
+	pge->DrawLineDecal(fd, { dx, dy }, cVector);
 
 	dx = fd.x - 5 * std::sin(fAngle + DEGS_TO_RADS(45));
 	dy = fd.y - 5 * std::cos(fAngle + DEGS_TO_RADS(45));
-	pge->DrawLineDecal(fd, { dx, dy }, olc::YELLOW);
-
+	pge->DrawLineDecal(fd, { dx, dy }, cVector);
 
 	pge->FillRectDecal({ coords.x * GAME_GRID_PX_SIZE_X - 5, coords.y * GAME_GRID_PX_SIZE_Y - 5 }, { 10, 10 }, olc::CYAN);
 	pge->DrawStringDecal({ 10, 10 }, "Movement: " + moveDirToStr(pMove) + ", Radians: " + std::to_string(fAngle) + ", Angle: " + std::to_string(fAngle * M_RAD_DEG));
@@ -168,4 +171,8 @@ void GamePlayer::updatePlayerPositionWithWallDetection(float dx, float dy) {
 	auto vec = posPlayer();
 	if (!checkWall({ (int)(vec.x + dx), (int)(vec.y) })) coords.x += dx;
 	if (!checkWall({ (int)(vec.x), (int)(vec.y + dy) })) coords.y += dy;
+}
+
+float GamePlayer::playerAngle() {
+	return fAngle;
 }

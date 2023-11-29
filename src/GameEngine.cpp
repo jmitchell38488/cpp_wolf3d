@@ -6,7 +6,6 @@
 GameEngine::GameEngine() {
 	std::chrono::time_point<std::chrono::system_clock> m_tp1, m_tp2;
 	fAccumulatedTime = 0.0f;
-
 }
 
 float GameEngine::getRunTime() {
@@ -23,6 +22,10 @@ void GameEngine::handleInput(float fElapsedTime) {
 	if (pge->GetKey(olc::Key::ESCAPE).bPressed) {
 		resetGame();
 	}
+
+	if (pge->GetKey(olc::Key::R).bPressed) {
+		bDrawRays = !bDrawRays;
+	}
 }
 
 // See: https://docs.unity3d.com/Manual/ExecutionOrder.html
@@ -32,6 +35,7 @@ void GameEngine::doGameUpdate(float fElapsedTime) {
 		// Perform some other updates in here, including animation updates, AI updates, fire animations, etc
 
 		gPlayer->update(fElapsedTime, getPlayerMoveDir());
+		gRaycaster->update(fElapsedTime);
 
 		// Decrement timer
 		fAccumulatedTime -= fElapsedTime;
@@ -59,6 +63,8 @@ void GameEngine::resetGame() {
 bool GameEngine::initialise(olc::PixelGameEngine* engine) {
 	gMap = std::make_unique<GameMap>(initialise_map());
 	gPlayer = std::make_unique<GamePlayer>(this);
+	gRaycaster = std::make_unique<Raycaster>(this);
+
 	pge = engine;
 
 	return true;
@@ -71,6 +77,7 @@ void GameEngine::render() {
 	for (auto pos : gMap->coords)
 		pge->DrawRectDecal({ pos.x * GAME_GRID_PX_SIZE_X, pos.y * GAME_GRID_PX_SIZE_Y }, { GAME_GRID_PX_SIZE_X, GAME_GRID_PX_SIZE_Y }, px);
 
+	gRaycaster->render(pge);
 	gPlayer->render(pge);
 }
 

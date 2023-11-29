@@ -7,6 +7,7 @@
 #include "Definitions.h"
 #include "GameMap.h"
 #include "GamePlayer.h"
+#include "Raycaster.h"
 #include <olcPixelGameEngine.h>
 
 #pragma once
@@ -18,7 +19,11 @@ protected:
 	std::vector<olc::Pixel> pixels;
 	std::unique_ptr<GameMap> gMap = nullptr;
 	std::unique_ptr<GamePlayer> gPlayer = nullptr;
+	std::unique_ptr<Raycaster> gRaycaster = nullptr;
 	olc::PixelGameEngine* pge = nullptr;
+
+public:
+	bool bDrawRays = false;
 
 public:
 	GameEngine();
@@ -37,6 +42,7 @@ public:
 
 private:
 	friend class GamePlayer;
+	friend class Raycaster;
 };
 
 #endif // GAME_ENGINE

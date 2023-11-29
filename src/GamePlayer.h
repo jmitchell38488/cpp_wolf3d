@@ -30,6 +30,7 @@ public:
 	void reset();
 	bool checkWall(olc::vi2d vec);
 	void updatePlayerPositionWithWallDetection(float dx, float dy);
+	float playerAngle();
 
 protected:
 	void movement(float fElapsedTime);
