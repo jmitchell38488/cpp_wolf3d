@@ -69,7 +69,7 @@
 // Camera
 #define C_FOV (M_PI / 3)
 #define C_HALF_FOV (C_FOV / 2)
-#define C_NUM_RAYS 20
+#define C_NUM_RAYS (GAME_WIDTH / 2)
 #define C_DELTA_ANGLE (C_FOV / C_NUM_RAYS)
 #define C_MAX_DEPTH 20
 

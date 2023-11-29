@@ -8,18 +8,16 @@
 class GameEngine;
 
 struct Ray {
-	float sx;
-	float sy;
 	float dx;
 	float dy;
 	float angle;
+	float magnitude;
 
-	void update(float ox, float oy, float px, float py, float ang) {
-		sx = ox;
-		sy = oy;
+	void update(float px, float py, float ang, float mag) {
 		dx = px;
 		dy = py;
 		angle = ang;
+		magnitude = mag;
 	}
 };
 

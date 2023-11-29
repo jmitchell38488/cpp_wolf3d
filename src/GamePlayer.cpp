@@ -5,14 +5,14 @@
 
 GamePlayer::GamePlayer() {
 	coords = { 1.5, 5 };
-	vDir = { std::sin(fAngle), std::cos(fAngle) };
 	fAngle = 0.0f;
+	vDir = { std::sin(fAngle), std::cos(fAngle) };
 }
 
 GamePlayer::GamePlayer(GameEngine * engine) : gEngine(engine) {
 	coords = { 1.5, 5 };
+	fAngle = M_RAD_DEGS_360 * 0.25;
 	vDir = { std::sin(fAngle), std::cos(fAngle) };
-	fAngle = 0.0f;
 }
 
 void GamePlayer::movement(float fElapsedTime) {
@@ -26,12 +26,6 @@ void GamePlayer::movement(float fElapsedTime) {
 	float fSin2 = 0.0f, fCos2 = 0.0f, fRads = 0.0f, fDiagRad = 0.0f;
 	float dx = 0.0f, dy = 0.0f;
 	float fRotSpd = MOUSE_SENS * PLAYER_SPEED * fElapsedTime;
-	float fPiAngle = (M_PI * 2 / 360);
-	float fRadOff = DEGS_TO_RADS(90);
-
-	// Adjusting diagonal movement to 1 / sqrt(2)
-	// dx += fSin * M_SQRT1_2;
-	// dy += fCos * M_SQRT1_2;
 
 	switch (pMove) {
 
