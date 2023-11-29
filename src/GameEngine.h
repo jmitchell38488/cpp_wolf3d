@@ -12,6 +12,10 @@
 
 #pragma once
 
+enum class GameRenderMode {
+	TOP, PROJECTED
+};
+
 class GameEngine {
 protected:
 	std::chrono::time_point<std::chrono::system_clock> m_tp1, m_tp2;
@@ -25,6 +29,7 @@ protected:
 public:
 	bool bDrawRays = false;
 	bool bDrawPlayerVector = false;
+	GameRenderMode renderMode = GameRenderMode::TOP;
 
 public:
 	GameEngine();

@@ -30,6 +30,14 @@ void GameEngine::handleInput(float fElapsedTime) {
 	if (pge->GetKey(olc::Key::V).bPressed) {
 		bDrawPlayerVector = !bDrawPlayerVector;
 	}
+
+	if (pge->GetKey(olc::Key::K9).bPressed) {
+		renderMode = GameRenderMode::TOP;
+	}
+
+	if (pge->GetKey(olc::Key::K0).bPressed) {
+		renderMode = GameRenderMode::PROJECTED;
+	}
 }
 
 // See: https://docs.unity3d.com/Manual/ExecutionOrder.html

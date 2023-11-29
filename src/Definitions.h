@@ -48,6 +48,8 @@
 
 #define GAME_WIDTH 800
 #define GAME_HEIGHT 450
+#define GAME_WIDTH_H (GAME_WIDTH * 0.5)
+#define GAME_HEIGHT_H (GAME_HEIGHT * 0.5)
 #define GAME_PIXEL 1
 #define GAME_GRID_SIZE_X 16
 #define GAME_GRID_SIZE_Y 9
@@ -72,5 +74,6 @@
 #define C_NUM_RAYS (GAME_WIDTH * C_HALF_FOV * 0.5)
 #define C_DELTA_ANGLE (C_FOV / C_NUM_RAYS)
 #define C_MAX_DEPTH 20
+#define C_SCALE (GAME_WIDTH / C_NUM_RAYS)
 
 #endif // !__DEFINITIONS__
