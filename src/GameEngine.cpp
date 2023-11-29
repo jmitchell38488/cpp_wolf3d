@@ -128,28 +128,32 @@ PlayerMovDir GameEngine::getPlayerMoveDir() {
 	if (bStrLeft && bStrRight) bStrLeft = bStrRight = false;
 	if (bLeft && bRight) bLeft = bRight = false;
 
-	if (bUp) pMove += 1;
-	if (bDown) pMove += 2;
-	if (bLeft) pMove += 3;
-	if (bRight) pMove += 4;
-	if (bStrLeft) pMove += 5;
-	if (bStrRight) pMove += 6;
+	if (bUp) pMove += 10;
+	if (bDown) pMove += 20;
 
-	if (bStrLeft && bUp || bStrRight && bUp) pMove += 10;
-	if (bStrLeft && bDown || bStrRight && bDown) pMove += 20;
+	if (bLeft) pMove += 1;
+	if (bRight) pMove += 2;
+	if (bStrLeft) pMove += 3;
+	if (bStrRight) pMove += 4;
 
 	switch (pMove) {
 		case 0: return PlayerMovDir::NONE;
-		case 1: return PlayerMovDir::FWD;
-		case 2: return PlayerMovDir::BACK;
-		case 3: return PlayerMovDir::LEFT;
-		case 4: return PlayerMovDir::RIGHT;
-		case 5: return PlayerMovDir::STRLEFT;
-		case 6: return PlayerMovDir::STRRIGHT;
-		case 16: return PlayerMovDir::FWDDIAGLEFT;
-		case 17: return PlayerMovDir::FWDDIAGRIGHT;
-		case 27: return PlayerMovDir::BKDIAGLEFT;
-		case 28: return PlayerMovDir::BKDIAGRIGHT;
+		case 10: return PlayerMovDir::FWD;
+		case 20: return PlayerMovDir::BACK;
+		case 1: return PlayerMovDir::LEFT;
+		case 2: return PlayerMovDir::RIGHT;
+		case 3: return PlayerMovDir::STRLEFT;
+		case 4: return PlayerMovDir::STRRIGHT;
+		// Combo keys forward
+		case 11: return PlayerMovDir::FWDLEFT;
+		case 12: return PlayerMovDir::FWDRIGHT;
+		case 13: return PlayerMovDir::FWDDIAGLEFT;
+		case 14: return PlayerMovDir::FWDDIAGRIGHT;
+			// Combo keys backward
+		case 21: return PlayerMovDir::BKLEFT;
+		case 22: return PlayerMovDir::BKRIGHT;
+		case 23: return PlayerMovDir::BKDIAGLEFT;
+		case 24: return PlayerMovDir::BKDIAGRIGHT;
 	}
 
 	return PlayerMovDir::NONE;

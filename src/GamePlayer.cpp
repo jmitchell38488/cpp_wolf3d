@@ -27,55 +27,73 @@ void GamePlayer::movement(float fElapsedTime) {
 	float dx = 0.0f, dy = 0.0f;
 	float fRotSpd = MOUSE_SENS * PLAYER_SPEED * fElapsedTime;
 
-	switch (pMove) {
+	bool bFwd = false;
+	bool bBack = false;
 
-	case PlayerMovDir::FWD:
+	switch (pMove) {
+		case PlayerMovDir::FWD:
+			bFwd = true;
+			break;
+
+		case PlayerMovDir::BACK:
+			bBack = true;
+			break;
+
+		case PlayerMovDir::LEFT:
+		case PlayerMovDir::FWDLEFT:
+		case PlayerMovDir::BKLEFT:
+			fAngle = ROT_RADS(fAngle + fRotSpd);
+			if (pMove == PlayerMovDir::FWDLEFT) bFwd = true;
+			if (pMove == PlayerMovDir::BKLEFT) bBack = true;
+			break;
+
+		case PlayerMovDir::RIGHT:
+		case PlayerMovDir::FWDRIGHT:
+		case PlayerMovDir::BKRIGHT:
+			fAngle = ROT_RADS(fAngle - fRotSpd);
+			if (pMove == PlayerMovDir::FWDRIGHT) bFwd = true;
+			if (pMove == PlayerMovDir::BKRIGHT) bBack = true;
+			break;
+
+		case PlayerMovDir::STRLEFT:
+			dx += fCos;
+			dy += -fSin;
+			break;
+
+		case PlayerMovDir::STRRIGHT:
+			dx += -fCos;
+			dy += fSin;
+			break;
+
+		case PlayerMovDir::FWDDIAGLEFT:
+		case PlayerMovDir::BKDIAGLEFT:
+			fDiagRad = DEGS_TO_RADS(45);
+			fRads = ROT_RADS(fAngle + fDiagRad);
+			fSin2 = std::sin(fRads);
+			fCos2 = std::cos(fRads);
+			dx += fSin2;
+			dy += fCos2;
+			break;
+
+		case PlayerMovDir::FWDDIAGRIGHT:
+		case PlayerMovDir::BKDIAGRIGHT:
+			fDiagRad = DEGS_TO_RADS(45);
+			fRads = ROT_RADS(fAngle - fDiagRad);
+			fSin2 = std::sin(fRads);
+			fCos2 = std::cos(fRads);
+			dx += fSin2;
+			dy += fCos2;
+			break;
+	}
+
+	if (bFwd) {
 		dx += fSin;
 		dy += fCos;
-		break;
+	}
 
-	case PlayerMovDir::BACK:
+	if (bBack) {
 		dx += -fSin;
 		dy += -fCos;
-		break;
-
-	case PlayerMovDir::LEFT:
-		fAngle = ROT_RADS(fAngle + fRotSpd);
-		break;
-
-	case PlayerMovDir::RIGHT:
-		fAngle = ROT_RADS(fAngle - fRotSpd);
-		break;
-
-	case PlayerMovDir::STRLEFT:
-		dx += fCos;
-		dy += -fSin;
-		break;
-
-	case PlayerMovDir::STRRIGHT:
-		dx += -fCos;
-		dy += fSin;
-		break;
-
-	case PlayerMovDir::FWDDIAGLEFT:
-	case PlayerMovDir::BKDIAGLEFT:
-		fDiagRad = DEGS_TO_RADS(45);
-		fRads = ROT_RADS(fAngle + fDiagRad);
-		fSin2 = std::sin(fRads);
-		fCos2 = std::cos(fRads);
-		dx += fSin2;
-		dy += fCos2;
-		break;
-
-	case PlayerMovDir::FWDDIAGRIGHT:
-	case PlayerMovDir::BKDIAGRIGHT:
-		fDiagRad = DEGS_TO_RADS(45);
-		fRads = ROT_RADS(fAngle - fDiagRad);
-		fSin2 = std::sin(fRads);
-		fCos2 = std::cos(fRads);
-		dx += fSin2;
-		dy += fCos2;
-		break;
 	}
 
 	if (std::abs(fAngle) > M_RAD_DEGS_360) {
