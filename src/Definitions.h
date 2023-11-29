@@ -3,6 +3,8 @@
 #ifndef __DEFINITIONS__
 #define __DEFINITIONS__
 
+// Maths
+
 #ifndef M_PI
 #define M_PI 3.14159265358979323846
 #endif // M_PI
@@ -20,8 +22,29 @@
 #endif // M_DEG_RAD
 
 #ifndef M_RAD_DEGS_360
-#define M_RAD_DEGS_360 360 * M_DEG_RAD
+#define M_RAD_DEGS_360 (360 * M_DEG_RAD)
 #endif // M_RAD_DEGS_360
+
+#ifndef DEGS_TO_RADS
+#define DEGS_TO_RADS(x) (x * M_DEG_RAD)
+#endif // DEGS_TO_RADS
+
+#ifndef RADS_TO_DEGS
+#define RADS_TO_DEGS(x) (x * M_RAD_DEG)
+#endif // RADS_TO_DEGS
+
+#ifndef ROT_RADS
+#define ROT_RADS(x) (x < 0 ? M_RAD_DEGS_360 - x : x)
+#endif // ROT_RADS
+
+#ifndef DEG_NORM
+#define DEG_NORM (1/360)
+#endif // DEG_NORM
+
+#ifndef RAD_NORM
+#define RAD_NORM (1/M_RAD_DEGS_360)
+#endif // RAD_NORM
+
 
 #define GAME_WIDTH 800
 #define GAME_HEIGHT 450
@@ -46,7 +69,7 @@
 // Camera
 #define C_FOV (M_PI / 3)
 #define C_HALF_FOV (C_FOV / 2)
-#define C_NUM_RAYS (GAME_WIDTH / 2)
+#define C_NUM_RAYS 20
 #define C_DELTA_ANGLE (C_FOV / C_NUM_RAYS)
 #define C_MAX_DEPTH 20
 

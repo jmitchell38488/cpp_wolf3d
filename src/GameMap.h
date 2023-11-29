@@ -4,6 +4,7 @@
 
 #include <vector>
 #include <olcPixelGameEngine.h>
+#include "Definitions.h"
 
 struct GameMap {
 	std::vector<uint16_t> tiles;
@@ -15,6 +16,10 @@ struct GameMap {
 				return true;
 		}
 		return false;
+	}
+
+	bool checkOutOfBounds(olc::vi2d vec) {
+		return vec.x < 0 || vec.x > GAME_GRID_SIZE_X || vec.y < 0 || vec.y > GAME_GRID_SIZE_Y;
 	}
 };
 

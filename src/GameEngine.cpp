@@ -26,6 +26,10 @@ void GameEngine::handleInput(float fElapsedTime) {
 	if (pge->GetKey(olc::Key::R).bPressed) {
 		bDrawRays = !bDrawRays;
 	}
+
+	if (pge->GetKey(olc::Key::V).bPressed) {
+		bDrawPlayerVector = !bDrawPlayerVector;
+	}
 }
 
 // See: https://docs.unity3d.com/Manual/ExecutionOrder.html

@@ -13,6 +13,14 @@ struct Ray {
 	float dx;
 	float dy;
 	float angle;
+
+	void update(float ox, float oy, float px, float py, float ang) {
+		sx = ox;
+		sy = oy;
+		dx = px;
+		dy = py;
+		angle = ang;
+	}
 };
 
 class Raycaster {

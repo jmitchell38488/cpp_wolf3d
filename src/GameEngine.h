@@ -24,6 +24,7 @@ protected:
 
 public:
 	bool bDrawRays = false;
+	bool bDrawPlayerVector = false;
 
 public:
 	GameEngine();
