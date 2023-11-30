@@ -87,7 +87,7 @@ void Raycaster::castRays(olc::vf2d coords, float fAngle) {
 		fDepth *= std::cos(fAngle - fRayAngle);
 
 		// Projection
-		float projHeight = screenDist / (fDepth + 1e-4);
+		float projHeight = (screenDist / (fDepth + 1e-4)) * M_PI * 3/4;
 
 		// Insert
 		if (m_rays.empty() || i + 1 > m_rays.size()) {
@@ -134,8 +134,12 @@ void Raycaster::render(olc::PixelGameEngine* pge) {
 				wallPos = { (float)(i * C_SCALE), 0 };
 			}
 
+
 			olc::vf2d sz{ C_SCALE, ray->projection };
-			pge->FillRectDecal(wallPos, sz, olc::WHITE);
+			float d = 1 / ray->depth * 3;
+			float alpha = (255 * d) / 255;
+			olc::Pixel col = olc::WHITE * alpha;
+			pge->FillRectDecal(wallPos, sz, col);
       i++;
 		}
 	}
