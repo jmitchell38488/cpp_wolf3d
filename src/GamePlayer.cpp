@@ -5,19 +5,22 @@
 
 GamePlayer::GamePlayer() {
 	coords = { 1.5, 5 };
-	fAngle = 0.0f;
+	fAngle = M_PI * 0.5f;
+  fFov = M_PI * 0.25f;
 	vDir = { std::sin(fAngle), std::cos(fAngle) };
 }
 
 GamePlayer::GamePlayer(GameEngine * engine) : gEngine(engine) {
 	coords = { 1.5, 5 };
-	fAngle = M_RAD_DEGS_360 * 0.25;
+	fAngle = M_PI * 0.5f;
+  fFov = M_PI * 0.25f;
 	vDir = { std::sin(fAngle), std::cos(fAngle) };
 }
 
 void GamePlayer::reset() {
 	coords = { 1.5, 5 };
-	fAngle = M_RAD_DEGS_360 * 0.25;
+	fAngle = M_PI * 0.5f;
+  fFov = M_PI * 0.25f;
 	vDir = { std::sin(fAngle), std::cos(fAngle) };
 }
 

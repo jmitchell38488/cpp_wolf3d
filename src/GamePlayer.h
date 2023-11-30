@@ -17,7 +17,8 @@ class GamePlayer {
 protected:
 	olc::vf2d coords;
 	olc::vf2d vDir;
-	float fAngle = 0.0f;
+	float fAngle;
+  float fFov;
 	PlayerMovDir pMove{ 0 };
 
 public:

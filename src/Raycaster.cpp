@@ -123,8 +123,8 @@ void Raycaster::render(olc::PixelGameEngine* pge) {
 	}
 
 	if (gEngine->renderMode == GameRenderMode::PROJECTED) {
-		for (int i = 0; i < m_rays.size(); i++) {
-			const auto ray = &m_rays[i];
+    int i = 0;
+		for (auto ray = m_rays.rbegin(); ray != m_rays.rend(); ray++) {
 			olc::vf2d wallPos = { 0, 0 }, wallCol = { 0, 0 };
 
 			if (ray->projection < GAME_HEIGHT) {
@@ -136,6 +136,7 @@ void Raycaster::render(olc::PixelGameEngine* pge) {
 
 			olc::vf2d sz{ C_SCALE, ray->projection };
 			pge->FillRectDecal(wallPos, sz, olc::WHITE);
+      i++;
 		}
 	}
 }
