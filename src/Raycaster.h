@@ -11,14 +11,14 @@ struct Ray {
 	float dx;
 	float dy;
 	float angle;
-	float magnitude;
+	float depth;
 	float projection;
 
-	void update(float px, float py, float ang, float mag, float proj) {
+	void update(float px, float py, float ang, float dep, float proj) {
 		dx = px;
 		dy = py;
 		angle = ang;
-		magnitude = mag;
+		depth = dep;
 		projection = proj;
 	}
 };

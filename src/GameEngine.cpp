@@ -86,8 +86,10 @@ void GameEngine::render() {
 	pge->Clear(olc::BLACK);
 	olc::Pixel px = olc::DARK_GREY;
 
-	for (auto pos : gMap->coords)
-		pge->DrawRectDecal({ pos.x * GAME_GRID_PX_SIZE_X, pos.y * GAME_GRID_PX_SIZE_Y }, { GAME_GRID_PX_SIZE_X, GAME_GRID_PX_SIZE_Y }, px);
+	if (renderMode == GameRenderMode::TOP) {
+		for (auto pos : gMap->coords)
+			pge->DrawRectDecal({ pos.x * GAME_GRID_PX_SIZE_X, pos.y * GAME_GRID_PX_SIZE_Y }, { GAME_GRID_PX_SIZE_X, GAME_GRID_PX_SIZE_Y }, px);
+	}
 
 	gRaycaster->render(pge);
 	gPlayer->render(pge);
