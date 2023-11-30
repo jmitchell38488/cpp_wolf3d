@@ -83,7 +83,7 @@ void Raycaster::castRays(olc::vf2d coords, float fAngle) {
 		dx = fSin;
 		dy = fCos;
 
-		// Remove fishbown effect
+		// Remove fishbowl effect
 		fDepth *= std::cos(fAngle - fRayAngle);
 
 		// Projection
@@ -124,22 +124,18 @@ void Raycaster::render(olc::PixelGameEngine* pge) {
 
 	if (gEngine->renderMode == GameRenderMode::PROJECTED) {
 		for (int i = 0; i < m_rays.size(); i++) {
-			auto ray = m_rays[i];
+			const auto ray = &m_rays[i];
 			olc::vf2d wallPos = { 0, 0 }, wallCol = { 0, 0 };
 
-			float mag = std::sqrt(ray.dx * ray.dx + ray.dy * ray.dy);
-			if (ray.projection < GAME_HEIGHT) {
-				wallPos = { (float)(i * C_SCALE), (float)(GAME_HEIGHT_H - ray.projection / 2) };
+			if (ray->projection < GAME_HEIGHT) {
+				wallPos = { (float)(i * C_SCALE), (float)(GAME_HEIGHT_H - ray->projection / 2) };
 			}
 			else {
 				wallPos = { (float)(i * C_SCALE), 0 };
 			}
 
-
-			float norm = std::sqrt(ray.dx * ray.dx + ray.dy * ray.dy);
-			olc::vf2d sc{ (float)(i * C_SCALE), (float)(GAME_HEIGHT_H - ray.projection / 2) };
-			olc::vf2d dc{ C_SCALE, ray.projection };
-			pge->FillRectDecal(sc, dc, olc::WHITE);
+			olc::vf2d sz{ C_SCALE, ray->projection };
+			pge->FillRectDecal(wallPos, sz, olc::WHITE);
 		}
 	}
 }

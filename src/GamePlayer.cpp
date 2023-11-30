@@ -15,6 +15,12 @@ GamePlayer::GamePlayer(GameEngine * engine) : gEngine(engine) {
 	vDir = { std::sin(fAngle), std::cos(fAngle) };
 }
 
+void GamePlayer::reset() {
+	coords = { 1.5, 5 };
+	fAngle = M_RAD_DEGS_360 * 0.25;
+	vDir = { std::sin(fAngle), std::cos(fAngle) };
+}
+
 void GamePlayer::movement(float fElapsedTime) {
 	// No movement to calculate
 	if (pMove == PlayerMovDir::NONE) {
@@ -178,11 +184,6 @@ std::string GamePlayer::moveDirToStr(PlayerMovDir pMove) {
 	case PlayerMovDir::BKDIAGRIGHT: return "BKDIAGRIGHT";
 	default: return "NONE";
 	}
-}
-
-void GamePlayer::reset() {
-	coords = { 1.5, 5 };
-	fAngle = 0.0f;
 }
 
 bool GamePlayer::checkWall(olc::vi2d vec) {

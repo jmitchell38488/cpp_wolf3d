@@ -22,7 +22,7 @@
 #endif // M_DEG_RAD
 
 #ifndef M_RAD_DEGS_360
-#define M_RAD_DEGS_360 (360 * M_DEG_RAD)
+#define M_RAD_DEGS_360 (2*M_PI)
 #endif // M_RAD_DEGS_360
 
 #ifndef DEGS_TO_RADS
@@ -42,7 +42,7 @@
 #endif // DEG_NORM
 
 #ifndef RAD_NORM
-#define RAD_NORM (1/M_RAD_DEGS_360)
+#define RAD_NORM (1/(2*M_PI))
 #endif // RAD_NORM
 
 
