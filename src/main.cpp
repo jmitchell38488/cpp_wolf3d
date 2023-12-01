@@ -6,7 +6,8 @@ class GameEngine;
 
 int main()
 {
-	auto gEngine = std::make_unique<GameEngine>();
-	auto launcher = std::make_unique<olcLauncher>(gEngine.get());
+	auto gSettings = std::make_unique<GameSettings>();
+	auto gEngine = std::make_unique<GameEngine>(gSettings.get());
+	auto launcher = std::make_unique<olcLauncher>(gEngine.get(), gSettings.get());
 	launcher->run();
 }

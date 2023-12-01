@@ -134,12 +134,6 @@ olc::vi2d GamePlayer::posMap() {
 void GamePlayer::render(olc::PixelGameEngine* pge) {
 	drawVectors(pge);
 	pge->FillRectDecal({ coords.x * GAME_GRID_PX_SIZE_X - 5, coords.y * GAME_GRID_PX_SIZE_Y - 5 }, { 10, 10 }, olc::CYAN);
-	pge->DrawStringDecal({ 10, 10 }, "Movement: " + moveDirToStr(pMove) 
-		+ ", Radians: " + std::to_string(fAngle) 
-		+ ", Angle: " + std::to_string(fAngle * M_RAD_DEG)
-		+ ", dx: " + std::to_string((int)(coords.x * GAME_GRID_PX_SIZE_X))
-		+ ", dy: " + std::to_string((int)(coords.y * GAME_GRID_PX_SIZE_Y))
-	);
 }
 
 void GamePlayer::drawVectors(olc::PixelGameEngine* pge) {
@@ -170,22 +164,6 @@ void GamePlayer::drawVectors(olc::PixelGameEngine* pge) {
 		dx = fd.x - 5 * std::sin(fAngle + DEGS_TO_RADS(45));
 		dy = fd.y - 5 * std::cos(fAngle + DEGS_TO_RADS(45));
 		pge->DrawLineDecal(fd, { dx, dy }, cVector);
-	}
-}
-
-std::string GamePlayer::moveDirToStr(PlayerMovDir pMove) {
-	switch (pMove) {
-	case PlayerMovDir::FWD: return "FORWARD";
-	case PlayerMovDir::BACK: return "BACK";
-	case PlayerMovDir::LEFT: return "LEFT";
-	case PlayerMovDir::RIGHT: return "RIGHT";
-	case PlayerMovDir::STRLEFT: return "STRLEFT";
-	case PlayerMovDir::STRRIGHT: return "STRRIGHT";
-	case PlayerMovDir::FWDDIAGLEFT: return "FWDDIAGLEFT";
-	case PlayerMovDir::FWDDIAGRIGHT: return "FWDDIAGRIGHT";
-	case PlayerMovDir::BKDIAGLEFT: return "BKDIAGLEFT";
-	case PlayerMovDir::BKDIAGRIGHT: return "BKDIAGRIGHT";
-	default: return "NONE";
 	}
 }
 
@@ -227,4 +205,40 @@ void GamePlayer::updatePlayerPositionWithWallDetection(float dx, float dy) {
 
 float GamePlayer::playerAngle() {
 	return fAngle;
+}
+
+std::string GamePlayer::pMoveDirToStr() {
+	switch (pMove) {
+	case PlayerMovDir::FWD: return "FORWARD";
+	case PlayerMovDir::BACK: return "BACK";
+	case PlayerMovDir::LEFT: return "LEFT";
+	case PlayerMovDir::RIGHT: return "RIGHT";
+	case PlayerMovDir::STRLEFT: return "STRLEFT";
+	case PlayerMovDir::STRRIGHT: return "STRRIGHT";
+	case PlayerMovDir::FWDLEFT: return "FWDLEFT";
+	case PlayerMovDir::FWDRIGHT: return "FWDRIGHT";
+	case PlayerMovDir::BKLEFT: return "BKLEFT";
+	case PlayerMovDir::BKRIGHT: return "BKRIGHT";
+	case PlayerMovDir::FWDDIAGLEFT: return "FWDDIAGLEFT";
+	case PlayerMovDir::FWDDIAGRIGHT: return "FWDDIAGRIGHT";
+	case PlayerMovDir::BKDIAGLEFT: return "BKDIAGLEFT";
+	case PlayerMovDir::BKDIAGRIGHT: return "BKDIAGRIGHT";
+	default: return "NONE";
+	}
+}
+
+void GamePlayer::pMoveStrToDir(const std::string move) {
+	if (move.compare("NONE") == 0) pMove = PlayerMovDir::NONE;
+	if (move.compare("FWD") == 0) pMove = PlayerMovDir::FWD;
+	if (move.compare("BACK") == 0) pMove = PlayerMovDir::BACK;
+	if (move.compare("LEFT") == 0) pMove = PlayerMovDir::LEFT;
+	if (move.compare("RIGHT") == 0) pMove = PlayerMovDir::RIGHT;
+	if (move.compare("STRLEFT") == 0) pMove = PlayerMovDir::STRLEFT;
+	if (move.compare("STRRIGHT") == 0) pMove = PlayerMovDir::STRRIGHT;
+	if (move.compare("FWDLEFT") == 0) pMove = PlayerMovDir::FWDLEFT;
+	if (move.compare("FWDRIGHT") == 0) pMove = PlayerMovDir::FWDRIGHT;
+	if (move.compare("BKLEFT") == 0) pMove = PlayerMovDir::BKLEFT;
+	if (move.compare("BKRIGHT") == 0) pMove = PlayerMovDir::BKRIGHT;
+	if (move.compare("BKDIAGLEFT") == 0) pMove = PlayerMovDir::BKDIAGLEFT;
+	if (move.compare("BKDIAGRIGHT") == 0) pMove = PlayerMovDir::BKDIAGRIGHT;
 }

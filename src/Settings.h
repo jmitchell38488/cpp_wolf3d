@@ -46,6 +46,7 @@ private:
 		double DeltaAngle = C_DELTA_ANGLE;
 		double MaxDepth = C_MAX_DEPTH;
 		double Scale = C_SCALE;
+		double ProjScale = M_PI / 2;
 		olc::Pixel RayColour = { 255, 255, 0, 255 };
 	};
 
@@ -59,15 +60,8 @@ public:
 	GS_Game Game;
 	GS_Camera Camera;
 
-private:
-	GameSettings();
-
 public:
-	static GameSettings& Get() {
-		static GameSettings instance;
-		instance.init();
-		return instance;
-	}
+	GameSettings();
 
 public:
 	void init();

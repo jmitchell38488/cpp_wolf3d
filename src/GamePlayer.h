@@ -14,7 +14,7 @@ enum class PlayerMovDir {
 class GameEngine;
 
 class GamePlayer {
-protected:
+public:
 	olc::vf2d coords;
 	olc::vf2d vDir;
 	float fAngle;
@@ -35,10 +35,11 @@ public:
 	bool checkWall(olc::vi2d vec);
 	void updatePlayerPositionWithWallDetection(float dx, float dy);
 	float playerAngle();
+	std::string pMoveDirToStr();
+	void pMoveStrToDir(const std::string pMove);
 
 protected:
 	void movement(float fElapsedTime);
-	std::string moveDirToStr(PlayerMovDir pMove);
 
 private:
 	void drawVectors(olc::PixelGameEngine* pge);

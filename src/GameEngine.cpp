@@ -1,5 +1,3 @@
-#define _CRT_SECURE_NO_WARNINGS
-
 #include "GameEngine.h"
 #include "Definitions.h"
 #include "GameMap.h"
@@ -16,6 +14,10 @@ using namespace std;
 GameEngine::GameEngine() {
 	std::chrono::time_point<std::chrono::system_clock> m_tp1, m_tp2;
 	fAccumulatedTime = 0.0f;
+}
+
+GameEngine::GameEngine(GameSettings* settings) : GameEngine() {
+	gSettings = settings;
 }
 
 float GameEngine::getRunTime() {
@@ -50,20 +52,21 @@ void GameEngine::handleInput(float fElapsedTime) {
 			renderMode = GameRenderMode::PROJECTED;
 		}
 	}
-	else {
-		if (pge->GetKey(olc::Key::OEM_3).bPressed) {
-			pge->ConsoleOut();
-		}
-	}
 
+// #if defined(__APPLE__)
+// 	if (pge->GetKey(olc::Key::PERIOD).bPressed) {
+// 		pge->ConsoleShow(olc::Key::PERIOD, true);
+// 		pge->ConsoleCaptureStdOut(true);
+// 	}
+// #else
 	if (pge->GetKey(olc::Key::OEM_3).bPressed) {
 		pge->ConsoleShow(olc::Key::OEM_3, true);
 		pge->ConsoleCaptureStdOut(true);
 	}
+// #endif
 }
 
 bool GameEngine::OnConsoleCommand(const std::string& sCommand) {
-  GameSettings gSettings = GameSettings::Get();
 	if (sCommand == "exit" || sCommand == "quit") {
 		exit(0);
 	}
@@ -76,29 +79,66 @@ bool GameEngine::OnConsoleCommand(const std::string& sCommand) {
 	// eg. "bDrawRays" -> value(bDrawRays)
 	// "bDrawRays false" -> new value(bDrawRays)
 
+	std::string key = "";
 	if (!tokens.empty()) {
-		if (tokens[0].compare("window.size") == 0) {
+		key = "window.size";
+		tolowercase(key);
+		if (tokens[0].compare(key) == 0) {
 			if (tokens.size() == 1)
-				cout << "Window (" << gSettings.Window.Width << ", " << gSettings.Window.Height << ")" << endl;
+				cout << "Window (" << gSettings->Window.Width << ", " << gSettings->Window.Height << ")" << endl;
 		}
 
-		if (tokens[0].compare("bDrawRays") == 0) {
+		key = "bDrawRays";
+		tolowercase(key);
+		if (tokens[0].compare(key) == 0) {
 			if (tokens.size() == 1)
 				cout << "bDrawRays=" << bDrawRays << endl;
-
 			if (tokens.size() == 2) {
 				if (tokens[1].compare("1") == 0) bDrawRays = true;
 				if (tokens[1].compare("0") == 0) bDrawRays = false;
 			}
 		}
 
-		if (tokens[0].compare("debug") == 0) {
+		key = "debug";
+		tolowercase(key);
+		if (tokens[0].compare(key) == 0) {
 			if (tokens.size() == 1)
-				cout << "debug=" << gSettings.Game.DebugMode << endl;
+				cout << "debug=" << gSettings->Game.DebugMode << endl;
 			if (tokens.size() == 2)
-				if (tokens[1].compare("1") == 0) gSettings.Game.DebugMode = true;
-				if (tokens[1].compare("0") == 0) gSettings.Game.DebugMode = false;
+				if (tokens[1].compare("1") == 0) gSettings->Game.DebugMode = true;
+				if (tokens[1].compare("0") == 0) gSettings->Game.DebugMode = false;
 		}
+
+		key = "view.mode";
+		tolowercase(key);
+		if (tokens[0].compare(key) == 0) {
+			if (tokens.size() == 1)
+				cout << "view.mode=" << (renderMode == GameRenderMode::TOP ? "2d" : "projected 3d") << endl;
+			if (tokens.size() == 2) {
+				if (tokens[1].compare("2d") == 0) renderMode = GameRenderMode::TOP;
+				if (tokens[1].compare("3d") == 0) renderMode = GameRenderMode::PROJECTED;
+			}
+		}
+
+		key = "camera.proj.scale";
+		tolowercase(key);
+		if (tokens[0].compare(key) == 0) {
+			if (tokens.size() == 1)
+				cout << "camera.proj.scale=" << gSettings->Camera.ProjScale << endl;
+			if (tokens.size() == 2) {
+				float num = std::stof(tokens[1]);
+				gSettings->Camera.ProjScale = num;
+			}
+		}
+
+		key = "list";
+		tolowercase(key);
+		if (tokens[0].compare(key) == 0) {
+			std::vector<std::string> cmds{"window.size","bDrawRays","debug","view.mode","camera.proj.scale","quit"};
+			for (auto c : cmds) cout << c << endl;
+		}
+
+
 	}
 
 	tokens.clear();
@@ -152,7 +192,6 @@ bool GameEngine::initialise(olc::PixelGameEngine* engine) {
 }
 
 void GameEngine::render() {
-	GameSettings gSettings = GameSettings::Get();
 	pge->Clear(olc::BLACK);
 	olc::Pixel px = olc::DARK_GREY;
 
@@ -164,12 +203,12 @@ void GameEngine::render() {
 	gRaycaster->render(pge);
 	gPlayer->render(pge);
 
-	if (gSettings.Game.DebugMode) {
-		pge->DrawStringDecal({ 10, 10 }, "Movement: " + moveDirToStr(pMove)
-			+ ", Radians: " + std::to_string(fAngle)
-			+ ", Angle: " + std::to_string(fAngle * M_RAD_DEG)
-			+ ", dx: " + std::to_string((int)(coords.x * GAME_GRID_PX_SIZE_X))
-			+ ", dy: " + std::to_string((int)(coords.y * GAME_GRID_PX_SIZE_Y))
+	if (gSettings->Game.DebugMode) {
+		pge->DrawStringDecal({ 10, 10 }, "Movement: " + gPlayer->pMoveDirToStr()
+			+ ", Radians: " + std::to_string(gPlayer->fAngle)
+			+ ", Angle: " + std::to_string(RADS_TO_DEGS(gPlayer->fAngle))
+			+ ", dx: " + std::to_string((int)(gPlayer->coords.x * gSettings->Grid.SizeX))
+			+ ", dy: " + std::to_string((int)(gPlayer->coords.y * gSettings->Grid.SizeY))
 		);
 	}
 }

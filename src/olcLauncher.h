@@ -11,10 +11,11 @@ class GameEngine;
 class olcLauncher : public olc::PixelGameEngine {
 private:
 	GameEngine* gEngine = nullptr;
+	GameSettings* gSettings = nullptr;
 
 public:
 	olcLauncher();
-	olcLauncher(GameEngine* engine);
+	olcLauncher(GameEngine* engine, GameSettings* settings);
 	~olcLauncher();
 
 public:

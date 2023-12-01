@@ -2,13 +2,14 @@
 #define GAME_ENGINE
 
 #include <vector>
+#include <olcPixelGameEngine.h>
 
-#include "olcPixelGameEngine.h"
 #include "GameMap.h"
 #include "GamePlayer.h"
 #include "Raycaster.h"
 #include "ObjectRenderer.h"
-#include <olcPixelGameEngine.h>
+#include "Settings.h"
+
 
 #pragma once
 
@@ -26,6 +27,7 @@ protected:
 	std::unique_ptr<Raycaster> gRaycaster = nullptr;
 	std::unique_ptr<ObjectRenderer> gObjRenderer = nullptr;
 	olc::PixelGameEngine* pge = nullptr;
+	GameSettings* gSettings = nullptr;
 
 public:
 	bool bDrawRays = false;
@@ -34,6 +36,7 @@ public:
 
 public:
 	GameEngine();
+	GameEngine(GameSettings* settings);
 
 public:
 	void handleInput(float fElapsedTime);

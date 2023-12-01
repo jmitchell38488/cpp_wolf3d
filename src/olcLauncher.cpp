@@ -7,8 +7,9 @@ olcLauncher::olcLauncher() {
 	sAppName = "Wolf3D";
 }
 
-olcLauncher::olcLauncher(GameEngine* engine) : olcLauncher() {
+olcLauncher::olcLauncher(GameEngine* engine, GameSettings* settings) : olcLauncher() {
 	gEngine = engine;
+	gSettings = settings;
 }
 
 olcLauncher::~olcLauncher() {
@@ -24,15 +25,14 @@ bool olcLauncher::OnUserUpdate(float fElapsedTime) {
 }
 
 void olcLauncher::run() {
-	GameSettings gSettings = GameSettings::Get();
 	if (Construct(
-		gSettings.Window.Width,
-		gSettings.Window.Height,
-		gSettings.Window.Pixel,
-		gSettings.Window.Pixel,
-		gSettings.Window.FullScreen,
-		gSettings.Window.VSync,
-		gSettings.Window.PxCoh))
+		gSettings->Window.Width,
+		gSettings->Window.Height,
+		gSettings->Window.Pixel,
+		gSettings->Window.Pixel,
+		gSettings->Window.FullScreen,
+		gSettings->Window.VSync,
+		gSettings->Window.PxCoh))
 	{
 		Start();
 	}

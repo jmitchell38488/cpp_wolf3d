@@ -6203,6 +6203,9 @@ namespace olc {
 			mapKeys[48] = Key::K0; mapKeys[49] = Key::K1; mapKeys[50] = Key::K2; mapKeys[51] = Key::K3; mapKeys[52] = Key::K4;
 			mapKeys[53] = Key::K5; mapKeys[54] = Key::K6; mapKeys[55] = Key::K7; mapKeys[56] = Key::K8; mapKeys[57] = Key::K9;
 
+			mapKeys['`'] = Key::OEM_3;
+			mapKeys['~'] = Key::OEM_3;
+
 			// NOTE: MISSING KEYS :O
 
 			glutKeyboardFunc([](unsigned char key, int x, int y) -> void {
