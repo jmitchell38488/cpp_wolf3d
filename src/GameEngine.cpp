@@ -1,7 +1,17 @@
+#define _CRT_SECURE_NO_WARNINGS
+
 #include "GameEngine.h"
 #include "Definitions.h"
 #include "GameMap.h"
 #include "GamePlayer.h"
+#include "Raycaster.h"
+#include "ObjectRenderer.h"
+#include "GameMap.h"
+#include "Settings.h"
+#include "Util.h"
+#include <iostream>
+#include <string.h>
+using namespace std;
 
 GameEngine::GameEngine() {
 	std::chrono::time_point<std::chrono::system_clock> m_tp1, m_tp2;
@@ -15,29 +25,85 @@ float GameEngine::getRunTime() {
 }
 
 void GameEngine::handleInput(float fElapsedTime) {
-	if (pge->GetKey(olc::Key::Q).bPressed) {
+	if (!pge->IsConsoleShowing()) {
+		if (pge->GetKey(olc::Key::Q).bPressed) {
+			exit(0);
+		}
+
+		if (pge->GetKey(olc::Key::ESCAPE).bPressed) {
+			resetGame();
+		}
+
+		if (pge->GetKey(olc::Key::R).bPressed) {
+			bDrawRays = !bDrawRays;
+		}
+
+		if (pge->GetKey(olc::Key::V).bPressed) {
+			bDrawPlayerVector = !bDrawPlayerVector;
+		}
+
+		if (pge->GetKey(olc::Key::K9).bPressed) {
+			renderMode = GameRenderMode::TOP;
+		}
+
+		if (pge->GetKey(olc::Key::K0).bPressed) {
+			renderMode = GameRenderMode::PROJECTED;
+		}
+	}
+	else {
+		if (pge->GetKey(olc::Key::OEM_3).bPressed) {
+			pge->ConsoleOut();
+		}
+	}
+
+	if (pge->GetKey(olc::Key::OEM_3).bPressed) {
+		pge->ConsoleShow(olc::Key::OEM_3, true);
+		pge->ConsoleCaptureStdOut(true);
+	}
+}
+
+bool GameEngine::OnConsoleCommand(const std::string& sCommand) {
+  GameSettings gSettings = GameSettings::Get();
+	if (sCommand == "exit" || sCommand == "quit") {
 		exit(0);
 	}
 
-	if (pge->GetKey(olc::Key::ESCAPE).bPressed) {
-		resetGame();
+	std::vector<std::string> tokens;
+	split(sCommand, tokens, ' ');
+
+	// If vector is len=1 then output of value requests
+	// If vector is len=>2 then set new value
+	// eg. "bDrawRays" -> value(bDrawRays)
+	// "bDrawRays false" -> new value(bDrawRays)
+
+	if (!tokens.empty()) {
+		if (tokens[0].compare("window.size") == 0) {
+			if (tokens.size() == 1)
+				cout << "Window (" << gSettings.Window.Width << ", " << gSettings.Window.Height << ")" << endl;
+		}
+
+		if (tokens[0].compare("bDrawRays") == 0) {
+			if (tokens.size() == 1)
+				cout << "bDrawRays=" << bDrawRays << endl;
+
+			if (tokens.size() == 2) {
+				if (tokens[1].compare("1") == 0) bDrawRays = true;
+				if (tokens[1].compare("0") == 0) bDrawRays = false;
+			}
+		}
+
+		if (tokens[0].compare("debug") == 0) {
+			if (tokens.size() == 1)
+				cout << "debug=" << gSettings.Game.DebugMode << endl;
+			if (tokens.size() == 2)
+				if (tokens[1].compare("1") == 0) gSettings.Game.DebugMode = true;
+				if (tokens[1].compare("0") == 0) gSettings.Game.DebugMode = false;
+		}
 	}
 
-	if (pge->GetKey(olc::Key::R).bPressed) {
-		bDrawRays = !bDrawRays;
-	}
+	tokens.clear();
 
-	if (pge->GetKey(olc::Key::V).bPressed) {
-		bDrawPlayerVector = !bDrawPlayerVector;
-	}
-
-	if (pge->GetKey(olc::Key::K9).bPressed) {
-		renderMode = GameRenderMode::TOP;
-	}
-
-	if (pge->GetKey(olc::Key::K0).bPressed) {
-		renderMode = GameRenderMode::PROJECTED;
-	}
+	return true;
 }
 
 // See: https://docs.unity3d.com/Manual/ExecutionOrder.html
@@ -46,8 +112,10 @@ void GameEngine::doGameUpdate(float fElapsedTime) {
 		// gScriptProcessor->processCommands(fElapsedTime);
 		// Perform some other updates in here, including animation updates, AI updates, fire animations, etc
 
-		gPlayer->update(fElapsedTime, getPlayerMoveDir());
-		gRaycaster->update(fElapsedTime);
+		if (!pge->IsConsoleShowing()) {
+			gPlayer->update(fElapsedTime, getPlayerMoveDir());
+			gRaycaster->update(fElapsedTime);
+		}
 
 		// Decrement timer
 		fAccumulatedTime -= fElapsedTime;
@@ -76,6 +144,7 @@ bool GameEngine::initialise(olc::PixelGameEngine* engine) {
 	gMap = std::make_unique<GameMap>(initialise_map());
 	gPlayer = std::make_unique<GamePlayer>(this);
 	gRaycaster = std::make_unique<Raycaster>(this);
+	gObjRenderer = std::make_unique<ObjectRenderer>(this);
 
 	pge = engine;
 
@@ -83,6 +152,7 @@ bool GameEngine::initialise(olc::PixelGameEngine* engine) {
 }
 
 void GameEngine::render() {
+	GameSettings gSettings = GameSettings::Get();
 	pge->Clear(olc::BLACK);
 	olc::Pixel px = olc::DARK_GREY;
 
@@ -93,6 +163,15 @@ void GameEngine::render() {
 
 	gRaycaster->render(pge);
 	gPlayer->render(pge);
+
+	if (gSettings.Game.DebugMode) {
+		pge->DrawStringDecal({ 10, 10 }, "Movement: " + moveDirToStr(pMove)
+			+ ", Radians: " + std::to_string(fAngle)
+			+ ", Angle: " + std::to_string(fAngle * M_RAD_DEG)
+			+ ", dx: " + std::to_string((int)(coords.x * GAME_GRID_PX_SIZE_X))
+			+ ", dy: " + std::to_string((int)(coords.y * GAME_GRID_PX_SIZE_Y))
+		);
+	}
 }
 
 PlayerMovDir GameEngine::getPlayerMoveDir() {

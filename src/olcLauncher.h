@@ -21,6 +21,7 @@ public:
 	bool OnUserCreate() override;
 	bool OnUserUpdate(float fElapsedTime) override;
 	void run();
+	virtual bool OnConsoleCommand(const std::string& sCommand);
 };
 
 #endif // OLC_LAUNCHER 

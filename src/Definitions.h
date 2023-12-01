@@ -76,4 +76,8 @@
 #define C_MAX_DEPTH 20
 #define C_SCALE (GAME_WIDTH / C_NUM_RAYS)
 
+// Textures
+#define T_SIZE 256
+#define T_SIZE_H (256 * 0.5)
+
 #endif // !__DEFINITIONS__

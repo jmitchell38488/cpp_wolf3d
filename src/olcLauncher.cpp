@@ -1,7 +1,7 @@
 #include <olcPixelGameEngine.h>
 #include "olcLauncher.h"
 #include "GameEngine.h"
-#include "Definitions.h"
+#include "Settings.h"
 
 olcLauncher::olcLauncher() {
 	sAppName = "Wolf3D";
@@ -24,8 +24,20 @@ bool olcLauncher::OnUserUpdate(float fElapsedTime) {
 }
 
 void olcLauncher::run() {
-	if (Construct(GAME_WIDTH, GAME_HEIGHT, GAME_PIXEL, GAME_PIXEL, FS_MODE, VSYNC_MODE, PX_COHESION))
+	GameSettings gSettings = GameSettings::Get();
+	if (Construct(
+		gSettings.Window.Width,
+		gSettings.Window.Height,
+		gSettings.Window.Pixel,
+		gSettings.Window.Pixel,
+		gSettings.Window.FullScreen,
+		gSettings.Window.VSync,
+		gSettings.Window.PxCoh))
 	{
 		Start();
 	}
+}
+
+bool olcLauncher::OnConsoleCommand(const std::string& sCommand) {
+	return gEngine->OnConsoleCommand(sCommand);
 }

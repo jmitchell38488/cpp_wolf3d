@@ -4,10 +4,10 @@
 #include <vector>
 
 #include "olcPixelGameEngine.h"
-#include "Definitions.h"
 #include "GameMap.h"
 #include "GamePlayer.h"
 #include "Raycaster.h"
+#include "ObjectRenderer.h"
 #include <olcPixelGameEngine.h>
 
 #pragma once
@@ -24,6 +24,7 @@ protected:
 	std::unique_ptr<GameMap> gMap = nullptr;
 	std::unique_ptr<GamePlayer> gPlayer = nullptr;
 	std::unique_ptr<Raycaster> gRaycaster = nullptr;
+	std::unique_ptr<ObjectRenderer> gObjRenderer = nullptr;
 	olc::PixelGameEngine* pge = nullptr;
 
 public:
@@ -40,6 +41,7 @@ public:
 	bool update(float fElapsedTime);
 	void render();
 	PlayerMovDir getPlayerMoveDir();
+	bool OnConsoleCommand(const std::string& sCommand);
 
 public:
 	void resetGame();
@@ -49,6 +51,7 @@ public:
 private:
 	friend class GamePlayer;
 	friend class Raycaster;
+	friend class ObjectRenderer;
 };
 
 #endif // GAME_ENGINE

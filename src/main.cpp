@@ -1,5 +1,6 @@
 #include "GameEngine.h"
 #include "olcLauncher.h"
+#include "Settings.h"
 
 class GameEngine;
 
