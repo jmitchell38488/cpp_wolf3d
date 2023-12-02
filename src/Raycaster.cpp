@@ -10,6 +10,12 @@ Raycaster::Raycaster() {}
 Raycaster::Raycaster(GameEngine* engine) : gEngine(engine) {}
 
 void Raycaster::castRays(olc::vf2d coords, float fAngle) {
+	// Rays could have been updated in the last cycle by console command
+	if (fRays != (int)gEngine->gSettings->Camera.Rays) {
+		fRays = (int)gEngine->gSettings->Camera.Rays;
+		m_rays.clear();
+	}
+
 	olc::vi2d mapCoords = gEngine->gPlayer->posMap();
 
 	float fRayAngle = fAngle - gEngine->gSettings->Camera.FovHalf + 0.0001; //radians
@@ -113,7 +119,7 @@ void Raycaster::castRays(olc::vf2d coords, float fAngle) {
 			m_rays[i].update(dx, dy, fRayAngle, fDepth, projHeight, iText, iTextOff);
 		}
 
-		fRayAngle += C_DELTA_ANGLE;
+		fRayAngle += gEngine->gSettings->Camera.DeltaAngle;
 	}
 }
 
@@ -146,7 +152,7 @@ void Raycaster::render(olc::PixelGameEngine* pge) {
 			olc::vf2d wallPos = { 0, 0 }, wallCol = { 0, 0 };
 
 			if (ray->projection < gEngine->gSettings->Window.Height) {
-				wallPos = { (float)(i * gEngine->gSettings->Camera.Scale), (float)(GAME_HEIGHT_H - ray->projection / 2) };
+				wallPos = { (float)(i * gEngine->gSettings->Camera.Scale), (float)(gEngine->gSettings->Window.HeightHalf - ray->projection / 2) };
 			}
 			else {
 				wallPos = { (float)(i * gEngine->gSettings->Camera.Scale), 0 };
@@ -160,6 +166,11 @@ void Raycaster::render(olc::PixelGameEngine* pge) {
 
 			// pge->FillTexturedPolygon(wallPos);
 
+			auto LOD = gEngine->getLod();
+			if (LOD.text == 1) {
+				// do nothing for now
+			}
+			
 			pge->FillRectDecal(wallPos, sz, col);
 			i++;
 		}

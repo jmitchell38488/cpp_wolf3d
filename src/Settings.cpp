@@ -20,7 +20,7 @@ void GameSettings::init() {
 	GS_Grid gs_grid{ GAME_GRID_SIZE_X , GAME_GRID_SIZE_Y , GAME_GRID_PX_SIZE_X , GAME_GRID_PX_SIZE_Y };
 	Grid = gs_grid;
 
-	GS_Player gs_player{ PLAYER_SPEED , PLAYER_ROT_SPEED , MOUSE_SENS };
+	GS_Player gs_player{ PLAYER_SPEED , PLAYER_ROT_SPEED , MOUSE_SENS, PLAYER_SPEED / 2 };
 	Player = gs_player;
 
 	GS_Game gs_game{ FPS , GAME_TICK , ENABLE_DEBUG_MODE };

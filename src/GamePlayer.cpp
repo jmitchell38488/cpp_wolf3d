@@ -1,13 +1,15 @@
+#include <olcPixelGameEngine.h>
+
 #include "GamePlayer.h"
 #include "Definitions.h"
 #include "GameEngine.h"
-#include <olcPixelGameEngine.h>
 
 GamePlayer::GamePlayer() {
 	coords = { 1.5, 5 };
 	fAngle = M_PI * 0.5f;
   fFov = M_PI * 0.25f;
 	vDir = { std::sin(fAngle), std::cos(fAngle) };
+	bRunning = true;
 }
 
 GamePlayer::GamePlayer(GameEngine * engine) : gEngine(engine) {
@@ -15,6 +17,7 @@ GamePlayer::GamePlayer(GameEngine * engine) : gEngine(engine) {
 	fAngle = M_PI * 0.5f;
   fFov = M_PI * 0.25f;
 	vDir = { std::sin(fAngle), std::cos(fAngle) };
+	bRunning = true;
 }
 
 void GamePlayer::reset() {
@@ -34,7 +37,8 @@ void GamePlayer::movement(float fElapsedTime) {
 	float fCos = std::cos(fAngle);
 	float fSin2 = 0.0f, fCos2 = 0.0f, fRads = 0.0f, fDiagRad = 0.0f;
 	float dx = 0.0f, dy = 0.0f;
-	float fRotSpd = MOUSE_SENS * PLAYER_SPEED * fElapsedTime;
+	float fRotSpd = gEngine->gSettings->Player.Sens * gEngine->gSettings->Player.Speed * fElapsedTime;
+	float mvSpeed = bRunning ? gEngine->gSettings->Player.Speed : gEngine->gSettings->Player.WlkSpeed;
 
 	bool bFwd = false;
 	bool bBack = false;
@@ -111,7 +115,8 @@ void GamePlayer::movement(float fElapsedTime) {
 	}
 
 	// Normalise
-	updatePlayerPositionWithWallDetection(dx * PLAYER_SPEED * fElapsedTime, dy * PLAYER_SPEED * fElapsedTime);
+
+	updatePlayerPositionWithWallDetection(dx * mvSpeed * fElapsedTime, dy * mvSpeed * fElapsedTime);
 }
 
 void GamePlayer::update(float fElapsedTime, PlayerMovDir moveDir) {
@@ -133,7 +138,7 @@ olc::vi2d GamePlayer::posMap() {
 
 void GamePlayer::render(olc::PixelGameEngine* pge) {
 	drawVectors(pge);
-	pge->FillRectDecal({ coords.x * GAME_GRID_PX_SIZE_X - 5, coords.y * GAME_GRID_PX_SIZE_Y - 5 }, { 10, 10 }, olc::CYAN);
+	pge->FillRectDecal({ coords.x * (float)gEngine->gSettings->Grid.SizeX - 5, coords.y * (float)gEngine->gSettings->Grid.SizeY - 5 }, { 10, 10 }, olc::CYAN);
 }
 
 void GamePlayer::drawVectors(olc::PixelGameEngine* pge) {
@@ -147,10 +152,10 @@ void GamePlayer::drawVectors(olc::PixelGameEngine* pge) {
 		if (gEngine->bDrawRays)
 			cVector = olc::BLACK;
 
-		float sx = coords.x * GAME_GRID_PX_SIZE_X;
-		float sy = coords.y * GAME_GRID_PX_SIZE_Y;
-		float dx = (coords.x * GAME_GRID_PX_SIZE_X + 50 * vDir.x);
-		float dy = (coords.y * GAME_GRID_PX_SIZE_Y + 50 * vDir.y);
+		float sx = coords.x * (float)gEngine->gSettings->Grid.SizeX;
+		float sy = coords.y * (float)gEngine->gSettings->Grid.SizeY;
+		float dx = (coords.x * (float)gEngine->gSettings->Grid.SizeX + 50 * vDir.x);
+		float dy = (coords.y * (float)gEngine->gSettings->Grid.SizeY + 50 * vDir.y);
 		olc::vf2d fd = { dx, dy };
 
 
@@ -178,29 +183,6 @@ void GamePlayer::updatePlayerPositionWithWallDetection(float dx, float dy) {
 
 	vDir.x = std::sin(fAngle);
 	vDir.y = std::cos(fAngle);
-	// Normalise from point 0, where point zero is {0,0}
-	// 0.25 is right, 0.5 is top, 0.75 is left, 1.0 or 0.0 is straight down
-	// positive x from 0.0-0.5, negative x from 0.5-1.0
-	// positive y from 0.25-0.75, negative y from 0.0-0.25 & 0.75-1.0
-	//if (normRad <= 0) return; // Avoid divide by zero
-
-	//if (fAngle < 0.25) {
-	//	vDir.x = normRad / 0.25;
-	//	vDir.y = 1 - normRad / 0.25;
-	//}
-	//else if (fAngle < 0.5) {
-	//	vDir.x = 1 - normRad / 0.5;
-	//	vDir.y = normRad / 0.5;
-	//}
-	//else if (fAngle < 0.75) {
-	//	vDir.x = 0 - (normRad / 0.75);
-	//	vDir.y = 0 - (1 - normRad / 0.75);
-	//}
-	//else {
-	//	vDir.x = 0 - (1 - normRad / 1.0);
-	//	vDir.y = 0 - (normRad / 1.0);
-	//}
-	
 }
 
 float GamePlayer::playerAngle() {

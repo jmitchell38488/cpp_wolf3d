@@ -31,6 +31,7 @@ private:
 		double Speed = PLAYER_SPEED;
 		double Rotate = PLAYER_ROT_SPEED;
 		double Sens = MOUSE_SENS;
+		double WlkSpeed = PLAYER_SPEED / 2;
 	};
 
 	struct GS_Game {

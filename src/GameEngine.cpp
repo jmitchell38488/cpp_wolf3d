@@ -18,6 +18,7 @@ GameEngine::GameEngine() {
 
 GameEngine::GameEngine(GameSettings* settings) : GameEngine() {
 	gSettings = settings;
+	setLod(3);
 }
 
 float GameEngine::getRunTime() {
@@ -43,27 +44,20 @@ void GameEngine::handleInput(float fElapsedTime) {
 		if (pge->GetKey(olc::Key::V).bPressed) {
 			bDrawPlayerVector = !bDrawPlayerVector;
 		}
-
-		if (pge->GetKey(olc::Key::K9).bPressed) {
-			renderMode = GameRenderMode::TOP;
-		}
-
-		if (pge->GetKey(olc::Key::K0).bPressed) {
-			renderMode = GameRenderMode::PROJECTED;
-		}
 	}
 
-// #if defined(__APPLE__)
-// 	if (pge->GetKey(olc::Key::PERIOD).bPressed) {
-// 		pge->ConsoleShow(olc::Key::PERIOD, true);
-// 		pge->ConsoleCaptureStdOut(true);
-// 	}
-// #else
+	if (pge->GetKey(olc::Key::SHIFT).bHeld) {
+		if (gPlayer->bRunning) gPlayer->bRunning = false;
+	}
+
+	if (pge->GetKey(olc::Key::SHIFT).bReleased) {
+		gPlayer->bRunning = true;
+	}
+
 	if (pge->GetKey(olc::Key::OEM_3).bPressed) {
 		pge->ConsoleShow(olc::Key::OEM_3, true);
 		pge->ConsoleCaptureStdOut(true);
 	}
-// #endif
 }
 
 bool GameEngine::OnConsoleCommand(const std::string& sCommand) {
@@ -73,11 +67,6 @@ bool GameEngine::OnConsoleCommand(const std::string& sCommand) {
 
 	std::vector<std::string> tokens;
 	split(sCommand, tokens, ' ');
-
-	// If vector is len=1 then output of value requests
-	// If vector is len=>2 then set new value
-	// eg. "bDrawRays" -> value(bDrawRays)
-	// "bDrawRays false" -> new value(bDrawRays)
 
 	std::string key = "";
 	if (!tokens.empty()) {
@@ -131,12 +120,107 @@ bool GameEngine::OnConsoleCommand(const std::string& sCommand) {
 			}
 		}
 
+		key = "camera.fov";
+		tolowercase(key);
+		if (tokens[0].compare(key) == 0) {
+			if (tokens.size() == 1)
+				cout << "camera.fov=" << RADS_TO_DEGS(gSettings->Camera.ProjScale) << endl;
+			if (tokens.size() == 2) {
+				int num = std::stoi(tokens[1]);
+				if (num > 130 || num < 45) cout << "Bounds: 45 - 130" << endl;
+				else {
+					gSettings->Camera.DeltaAngle = gSettings->Camera.Fov / gSettings->Camera.Rays;
+					gSettings->Camera.Fov = DEGS_TO_RADS(num);
+					gSettings->Camera.FovHalf = DEGS_TO_RADS(num) / 2;
+				}
+			}
+		}
+
+		key = "camera.rays";
+		tolowercase(key);
+		if (tokens[0].compare(key) == 0) {
+			if (tokens.size() == 1)
+				cout << "camera.rays=" << (int)gSettings->Camera.Rays << endl;
+			if (tokens.size() == 2) {
+				int num = std::stoi(tokens[1]);
+				int max = 500;
+				if (num > max || num < 50) cout << "Bounds: 50 - 500" << max << endl;
+				else {
+					gSettings->Camera.Rays = num;
+					gSettings->Camera.DeltaAngle = gSettings->Camera.Fov / num;
+					gSettings->Camera.Scale = gSettings->Window.Width / num;
+				}
+			}
+		}
+
+		key = "camera.angle";
+		tolowercase(key);
+		if (tokens[0].compare(key) == 0) {
+			if (tokens.size() == 1)
+				cout << "camera.angle=" << gSettings->Camera.DeltaAngle << endl;
+		}
+
+		key = "camera.view.depth";
+		tolowercase(key);
+		if (tokens[0].compare(key) == 0) {
+			if (tokens.size() == 1)
+				cout << "camera.view.depth=" << gSettings->Camera.MaxDepth << endl;
+			if (tokens.size() == 2) {
+				float num = std::stof(tokens[1]);
+				if (num > 20 || num < 1) cout << "Bounds: 1 - 20" << endl;
+				else gSettings->Camera.MaxDepth = num;
+			}
+		}
+
+		key = "player.speed";
+		tolowercase(key);
+		if (tokens[0].compare(key) == 0) {
+			if (tokens.size() == 1)
+				cout << "player.speed=" << gSettings->Player.Speed << endl;
+			if (tokens.size() == 2) {
+				float num = std::stof(tokens[1]);
+				if (num > 10 || num < 0) cout << "Bounds: 1 - 10" << endl;
+				else {
+					gSettings->Player.Speed = num;
+					gSettings->Player.WlkSpeed = num / 2;
+				}
+			}
+		}
+
+		key = "lod";
+		tolowercase(key);
+		if (tokens[0].compare(key) == 0) {
+			if (tokens.size() == 1)
+				cout << "lod=" << lod << endl;
+			if (tokens.size() == 2) {
+				float num = std::stof(tokens[1]);
+				if (num > 5 || num < 1) cout << "Bounds: 1 - 5" << endl;
+				setLod(num);
+			}
+		}
+
+		key = "position";
+		tolowercase(key);
+		if (tokens[0].compare(key) == 0) {
+			if (tokens.size() == 1)
+				cout << "position{" 
+					<< (float)(gPlayer->coords.x * gSettings->Grid.SizeX)
+					<< "," 
+					<< (float)(gPlayer->coords.y * gSettings->Grid.SizeY)
+					<< "," 
+					<< gPlayer->fAngle 
+					<< "}" << endl;
+		}
+
 		key = "list";
 		tolowercase(key);
 		if (tokens[0].compare(key) == 0) {
-			std::vector<std::string> cmds{"window.size","bDrawRays","debug","view.mode","camera.proj.scale","quit"};
+			std::vector<std::string> cmds{"window.size","bDrawRays","debug","view.mode",
+			"camera.proj.scale","camera.fov","camera.view.depth","camera.fov","camera.rays",
+			"camera.angle","player.speed","debug","quit"};
 			for (auto c : cmds) cout << c << endl;
 		}
+		
 
 
 	}
@@ -209,6 +293,13 @@ void GameEngine::render() {
 			+ ", Angle: " + std::to_string(RADS_TO_DEGS(gPlayer->fAngle))
 			+ ", dx: " + std::to_string((int)(gPlayer->coords.x * gSettings->Grid.SizeX))
 			+ ", dy: " + std::to_string((int)(gPlayer->coords.y * gSettings->Grid.SizeY))
+			+ ", lod: " + std::to_string(lod)
+			+ ", rays: " + std::to_string((int)gSettings->Camera.Rays)
+			+ ", pos: {" + std::to_string((int)(gPlayer->coords.x * gSettings->Grid.SizeX))
+				+ "," + std::to_string((int)(gPlayer->coords.y * gSettings->Grid.SizeY))
+				+ "," + std::to_string(gPlayer->fAngle)
+				+ "}"
+			, olc::WHITE, {0.5f, 0.5f}
 		);
 	}
 }
@@ -285,4 +376,20 @@ PlayerMovDir GameEngine::getPlayerMoveDir() {
 	}
 
 	return PlayerMovDir::NONE;
+}
+
+GameEngine::LOD GameEngine::getLod() {
+	LOD l = lods[lod-1];
+	return GameEngine::LOD{l.rays, l.text, l.ddist, l.llevel}; // copy it instead of passing the object or a reference to it
+}
+
+void GameEngine::setLod(uint8_t l) {
+	if (l < 1 || l > lods.size()+1)
+		return;
+
+	lod = l;
+
+	gSettings->Camera.Rays = lods[lod-1].rays;
+	gSettings->Camera.DeltaAngle = gSettings->Camera.Fov / lods[lod-1].rays;
+	gSettings->Camera.Scale = gSettings->Window.Width / lods[lod-1].rays;
 }

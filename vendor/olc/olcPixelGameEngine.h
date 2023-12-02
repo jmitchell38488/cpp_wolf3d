@@ -6206,6 +6206,9 @@ namespace olc {
 			mapKeys['`'] = Key::OEM_3;
 			mapKeys['~'] = Key::OEM_3;
 
+			//mapKeys[XK_Shift_L] = Key::SHIFT; mapKeys[XK_Shift_R] = Key::SHIFT;
+			//mapKeys[VK_SHIFT] = Key::SHIFT;
+
 			// NOTE: MISSING KEYS :O
 
 			glutKeyboardFunc([](unsigned char key, int x, int y) -> void {

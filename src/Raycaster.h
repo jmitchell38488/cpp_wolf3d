@@ -39,6 +39,7 @@ public:
 
 private:
 	void castRays(olc::vf2d coords, float fAngle);
+	float fRays = 0.0f;
 
 private:
 	GameEngine* gEngine = nullptr;

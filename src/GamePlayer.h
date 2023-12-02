@@ -20,6 +20,7 @@ public:
 	float fAngle;
   float fFov;
 	PlayerMovDir pMove{ 0 };
+	bool bRunning;
 
 public:
 	GamePlayer();
