@@ -6,8 +6,16 @@
 #include "GameEngine.h"
 #include "Settings.h"
 
-Raycaster::Raycaster() {}
-Raycaster::Raycaster(GameEngine* engine) : gEngine(engine) {}
+Raycaster::Raycaster() {
+	sWall = new olc::Sprite({(std::string) "./data/resources/textures/1.png"});
+	dWall = new olc::Decal({sWall});
+	
+}
+
+Raycaster::Raycaster(GameEngine* engine) : gEngine(engine) {
+	sWall = new olc::Sprite({(std::string) "./data/resources/textures/1.png"});
+	dWall = new olc::Decal({sWall});
+}
 
 void Raycaster::castRays(olc::vf2d coords, float fAngle) {
 	// Rays could have been updated in the last cycle by console command
@@ -148,6 +156,7 @@ void Raycaster::render(olc::PixelGameEngine* pge) {
 
 	if (gEngine->renderMode == GameRenderMode::PROJECTED) {
 		int i = 0;
+		
 		for (auto ray = m_rays.rbegin(); ray != m_rays.rend(); ray++) {
 			olc::vf2d wallPos = { 0, 0 }, wallCol = { 0, 0 };
 
@@ -158,20 +167,28 @@ void Raycaster::render(olc::PixelGameEngine* pge) {
 				wallPos = { (float)(i * gEngine->gSettings->Camera.Scale), 0 };
 			}
 
-
 			olc::vf2d sz{ (float)gEngine->gSettings->Camera.Scale, ray->projection };
 			float d = 1 / ray->depth * 3;
 			float alpha = (255 * d) / 255;
 			olc::Pixel col = olc::WHITE * alpha;
 
-			// pge->FillTexturedPolygon(wallPos);
-
 			auto LOD = gEngine->getLod();
-			if (LOD.text == 1) {
-				// do nothing for now
+
+			// Render textured walls
+			if (LOD.text == 2 || LOD.text == 3) {
+				// float scale = (float)T_SIZE / (float)dWall->sprite->width * (gEngine->gSettings->Window.HeightHalf / ray->projection);
+				float scale = 1;
+				float offX = (float)(i * gEngine->gSettings->Camera.Scale) * scale;
+				float offY = ray->tOffset;
+				
+				// pge->DrawDecal(wallPos, dWall, {scale, scale});
+				// pge->DrawPartialDecal(wallPos, dWall, {offX, offY}, {(float)gEngine->gSettings->Camera.Scale, (float)ray->projection}, {scale, scale});
+				std::vector<olc::vf2d> pts{wallPos, {wallPos.x, wallPos.y + sz.y}, {wallPos.x + sz.x, wallPos.y + sz.y}, {wallPos.x + sz.x, wallPos.y}};
+				std::vector<olc::vf2d> uv{{1.0f, 1.0f}, {1.0f, 1.0f}, {1.0f, 1.0f}, {1.0f, 1.0f}};
+				pge->DrawPolygonDecal(dWall, pts, uv);
+			} else {
+				pge->FillRectDecal(wallPos, sz, col);
 			}
-			
-			pge->FillRectDecal(wallPos, sz, col);
 			i++;
 		}
 	}

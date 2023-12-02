@@ -42,6 +42,8 @@ private:
 	float fRays = 0.0f;
 
 private:
+	olc::Sprite * sWall = nullptr;
+	olc::Decal * dWall = nullptr;
 	GameEngine* gEngine = nullptr;
 	std::vector<Ray> m_rays;
 };
