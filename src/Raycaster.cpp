@@ -1,5 +1,3 @@
-#pragma once
-
 #include <math.h> 
 #include "Raycaster.h"
 #include "Definitions.h"
@@ -7,14 +5,14 @@
 #include "Settings.h"
 
 Raycaster::Raycaster() {
-	sWall = new olc::Sprite({(std::string) "./data/resources/textures/1.png"});
-	dWall = new olc::Decal({sWall});
+	sWall = new olc::Sprite({(std::string) "./data/resources/textures/1a.png"});
+	dWall = new olc::Decal(sWall);
 	
 }
 
 Raycaster::Raycaster(GameEngine* engine) : gEngine(engine) {
 	sWall = new olc::Sprite({(std::string) "./data/resources/textures/1.png"});
-	dWall = new olc::Decal({sWall});
+	dWall = new olc::Decal(sWall);
 }
 
 void Raycaster::castRays(olc::vf2d coords, float fAngle) {
@@ -178,14 +176,28 @@ void Raycaster::render(olc::PixelGameEngine* pge) {
 			if (LOD.text == 2 || LOD.text == 3) {
 				// float scale = (float)T_SIZE / (float)dWall->sprite->width * (gEngine->gSettings->Window.HeightHalf / ray->projection);
 				float scale = 1;
-				float offX = (float)(i * gEngine->gSettings->Camera.Scale) * scale;
+				float offX = (float)(i * gEngine->gSettings->Camera.Scale);
 				float offY = ray->tOffset;
+
+				const float dw = T_SIZE;
+
+				auto norm = [dw](float s){
+					if (s > dw) return dw;
+					if (s < 0) return 0.0f;
+					return s / dw;
+				};
 				
 				// pge->DrawDecal(wallPos, dWall, {scale, scale});
-				// pge->DrawPartialDecal(wallPos, dWall, {offX, offY}, {(float)gEngine->gSettings->Camera.Scale, (float)ray->projection}, {scale, scale});
-				std::vector<olc::vf2d> pts{wallPos, {wallPos.x, wallPos.y + sz.y}, {wallPos.x + sz.x, wallPos.y + sz.y}, {wallPos.x + sz.x, wallPos.y}};
-				std::vector<olc::vf2d> uv{{1.0f, 1.0f}, {1.0f, 1.0f}, {1.0f, 1.0f}, {1.0f, 1.0f}};
-				pge->DrawPolygonDecal(dWall, pts, uv);
+				pge->DrawPartialDecal(wallPos, dWall, {offX, 0-offY}, {(float)gEngine->gSettings->Camera.Scale, (float)ray->projection}, {scale, scale});
+				// pge->DrawPartialDecal(wallPos, dWall, {0, 0}, {(float)gEngine->gSettings->Camera.Scale, (float)ray->projection});
+				// std::vector<olc::vf2d> pts{wallPos, {wallPos.x, wallPos.y + sz.y}, {wallPos.x + sz.x, wallPos.y + sz.y}, {wallPos.x + sz.x, wallPos.y}};
+				// std::vector<olc::vf2d> pts{wallPos, {wallPos.x, wallPos.y + sz.y}, {wallPos.x + sz.x, wallPos.y + sz.y}, {wallPos.x + sz.x, wallPos.y}};
+				// std::array<olc::vf2d, 4> pos{wallPos, {wallPos.x, wallPos.y + sz.y}, {wallPos.x + sz.x, wallPos.y + sz.y}, {wallPos.x + sz.x, wallPos.y}};
+				// std::vector<olc::vf2d> uv;
+				// for (auto p : pts) uv.push_back({norm(p.x), norm(p.y)});
+
+				// pge->DrawPartialWarpedDecal(dWall, pos, {offX, offY}, {(float)gEngine->gSettings->Camera.Scale, (float)ray->projection});
+				// pge->DrawPolygonDecal(dWall, pts, uv);
 			} else {
 				pge->FillRectDecal(wallPos, sz, col);
 			}

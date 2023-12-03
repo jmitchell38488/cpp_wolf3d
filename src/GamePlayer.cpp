@@ -97,6 +97,9 @@ void GamePlayer::movement(float fElapsedTime) {
 			dx += fSin2;
 			dy += fCos2;
 			break;
+
+		default:
+			break;
 	}
 
 	if (bFwd) {
@@ -138,14 +141,16 @@ olc::vi2d GamePlayer::posMap() {
 
 void GamePlayer::render(olc::PixelGameEngine* pge) {
 	drawVectors(pge);
-	pge->FillRectDecal({ coords.x * (float)gEngine->gSettings->Grid.SizeX - 5, coords.y * (float)gEngine->gSettings->Grid.SizeY - 5 }, { 10, 10 }, olc::CYAN);
+
+	if (gEngine->renderMode == GameRenderMode::TOP) {
+		pge->FillRectDecal({ coords.x * (float)gEngine->gSettings->Grid.SizeX - 5, coords.y * (float)gEngine->gSettings->Grid.SizeY - 5 }, { 10, 10 }, olc::CYAN);
+	}
 }
 
 void GamePlayer::drawVectors(olc::PixelGameEngine* pge) {
-	if (!gEngine->bDrawRays) {
-
+	if (gEngine->renderMode == GameRenderMode::PROJECTED) {
+		return;
 	}
-
 
 	if (gEngine->bDrawPlayerVector) {
 		olc::Pixel cVector = olc::YELLOW;

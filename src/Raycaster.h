@@ -1,6 +1,5 @@
 #ifndef GAME_RAYCASTER
 #define GAME_RAYCASTER
-#pragma once
 
 #include <olcPixelGameEngine.h>
 #include <vector>
