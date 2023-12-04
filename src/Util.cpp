@@ -2,6 +2,7 @@
 #include <string>
 #include <vector>
 #include <math.h>
+#include <algorithm>
 
 size_t split(const std::string& txt, std::vector<std::string>& strs, char ch, STR_CASE tCase)
 {

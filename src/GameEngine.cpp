@@ -93,9 +93,10 @@ bool GameEngine::OnConsoleCommand(const std::string& sCommand) {
 		if (tokens[0].compare(key) == 0) {
 			if (tokens.size() == 1)
 				cout << "debug=" << gSettings->Game.DebugMode << endl;
-			if (tokens.size() == 2)
+			if (tokens.size() == 2) {
 				if (tokens[1].compare("1") == 0) gSettings->Game.DebugMode = true;
 				if (tokens[1].compare("0") == 0) gSettings->Game.DebugMode = false;
+			}
 		}
 
 		key = "view.mode";
