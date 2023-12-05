@@ -154,6 +154,7 @@ void Raycaster::render(olc::PixelGameEngine* pge) {
 
 	if (gEngine->renderMode == GameRenderMode::PROJECTED) {
 		int i = 0;
+		std::array<olc::vf2d, 4> pPoints, nPoints;
 		
 		for (auto ray = m_rays.rbegin(); ray != m_rays.rend(); ray++) {
 			olc::vf2d wallPos = { 0, 0 }, wallCol = { 0, 0 };
@@ -171,6 +172,30 @@ void Raycaster::render(olc::PixelGameEngine* pge) {
 			olc::Pixel col = olc::WHITE * alpha;
 
 			auto LOD = gEngine->getLod();
+
+			// Point smoothing
+			nPoints[0] = { wallPos.x, wallPos.y }; // top left
+			nPoints[1] = { wallPos.x, wallPos.y + sz.y }; // bottom left
+			nPoints[2] = { wallPos.x + sz.x, wallPos.y }; // top right
+			nPoints[3] = { wallPos.x + sz.x, wallPos.y + sz.y }; // bottom right
+
+			if (ray != m_rays.rbegin()) {
+				for (uint8_t i = 0; i < nPoints.size(); i++) {
+					nPoints[i] = pPoints[i].d_avg(nPoints[i]);
+				}
+			}
+
+			pPoints[0] = { wallPos.x, wallPos.y }; // top left
+			pPoints[1] = { wallPos.x, wallPos.y + sz.y }; // bottom left
+			pPoints[2] = { wallPos.x + sz.x, wallPos.y }; // top right
+			pPoints[3] = { wallPos.x + sz.x, wallPos.y + sz.y }; // bottom right
+
+			if (ray != m_rays.rbegin()) {
+				wallPos.x = pPoints[0].x;
+				wallPos.y = pPoints[0].y;
+			}
+			sz.x = pPoints[3].x - pPoints[0].x;
+			sz.y = pPoints[3].y - pPoints[0].y;
 
 			// Render textured walls
 			if (LOD.text == 2 || LOD.text == 3) {
@@ -199,6 +224,8 @@ void Raycaster::render(olc::PixelGameEngine* pge) {
 				// pge->DrawPartialWarpedDecal(dWall, pos, {offX, offY}, {(float)gEngine->gSettings->Camera.Scale, (float)ray->projection});
 				// pge->DrawPolygonDecal(dWall, pts, uv);
 			} else {
+				
+
 				pge->FillRectDecal(wallPos, sz, col);
 			}
 			i++;
