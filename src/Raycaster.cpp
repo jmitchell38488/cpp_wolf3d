@@ -92,18 +92,57 @@ void Raycaster::castRays(olc::vf2d coords, float fAngle) {
 		}
 
 		float fract = 0.0f, fractInt = 0.0f;
+		int mx = 0, my = 0;
+
+		// Degrees: 0 -> right, 90 -> bottom, 180 -> left, 270 -> top
+		// From 180 -> 360 (0), can only hit bottom faces
+		// From 0 -> 180, can only hit top faces
+		// From 270 -> 90, can only hit left faces
+		// From 90 -> 270 can only hit right faces
+
 		// Depth
+		auto fn = [fRayAngle](bool hz, float fX, float fY) {
+			float frX, frY;
+			modf(fX, &frX);
+			modf(fY, &frY);
+
+			// Hit a corner, exactly {0,0}, we'll pick a face based on angle
+			if (frX == frY && frX == 0) {
+				if (fRayAngle >= 0 && fRayAngle < 90) return RayFace::RIGHT;
+				if (fRayAngle >= 90 && fRayAngle < 180) return RayFace::BOTTOM;
+				if (fRayAngle >= 180 && fRayAngle < 270) return RayFace::LEFT;
+				if (fRayAngle >= 270) return RayFace::TOP;
+			}
+
+			if (frX > 0) { // impacted on x axis
+				if (fRayAngle >= 0 && fRayAngle <= 180) return RayFace::TOP;
+				if (fRayAngle > 180) return RayFace::BOTTOM;
+			}
+
+			if (frY > 0) { // impacted on y axis
+				if (fRayAngle > 270 || fRayAngle < 90) return RayFace::LEFT;
+				if (fRayAngle >= 90 || fRayAngle <= 270) return RayFace::RIGHT;
+			}
+		};
+
+		RayFace rFace;
 		if (fDepthVert < fDepthHorz) {
 			fDepth = fDepthVert;
 			iText = iTextVert;
 			fract = modf(fVertY, &fractInt);
 			iTextOff = fCos > 0 ? fract : 1 - fract;
+			mx = (int)fVertX;
+			my = (int)fVertY;
+			rFace = fn(false, fVertX, fVertY);
 		}
 		else {
 			fDepth = fDepthHorz;
 			iText = iTextHorz;
 			fract = modf(fHorzX, &fractInt);
 			iTextOff = fSin > 0 ? fract : 1 - fract;
+			mx = (int)fHorzX;
+			my = (int)fHorzY;
+			rFace = fn(false, fHorzX, fHorzY);
 		}
 
 		float sx = 0.0f, sy = 0.0f;
@@ -118,11 +157,11 @@ void Raycaster::castRays(olc::vf2d coords, float fAngle) {
 
 		// Insert
 		if (m_rays.empty() || i + 1 > m_rays.size()) {
-			m_rays.push_back({dx, dy, fRayAngle, fDepth, projHeight, iText, iTextOff});
+			m_rays.push_back({dx, dy, fRayAngle, fDepth, projHeight, iText, iTextOff, {mx, my}, rFace});
 		}
 		// Update
 		else {
-			m_rays[i].update(dx, dy, fRayAngle, fDepth, projHeight, iText, iTextOff);
+			m_rays[i].update(dx, dy, fRayAngle, fDepth, projHeight, iText, iTextOff, {mx, my}, rFace);
 		}
 
 		fRayAngle += gEngine->gSettings->Camera.DeltaAngle;
@@ -153,53 +192,62 @@ void Raycaster::render(olc::PixelGameEngine* pge) {
 	}
 
 	if (gEngine->renderMode == GameRenderMode::PROJECTED) {
-		int i = 0;
-		std::array<olc::vf2d, 4> pPoints, nPoints;
-		
-		for (auto ray = m_rays.rbegin(); ray != m_rays.rend(); ray++) {
-			olc::vf2d wallPos = { 0, 0 }, wallCol = { 0, 0 };
+		std::array<olc::vf2d, 4> pPoints, nPoints, dPoints;
 
-			if (ray->projection < gEngine->gSettings->Window.Height) {
-				wallPos = { (float)(i * gEngine->gSettings->Camera.Scale), (float)(gEngine->gSettings->Window.HeightHalf - ray->projection / 2) };
-			}
-			else {
-				wallPos = { (float)(i * gEngine->gSettings->Camera.Scale), 0 };
+		for (int i = 0; i <= m_rays.size(); i++) {
+			int idx = m_rays.size() - i+1;
+			auto * ray = &m_rays[idx];
+			auto coords = getProjectionCoords(ray, i);
+			auto wallPos = coords[0], sz = coords[1];
+
+			dPoints = getQuadVertices(wallPos, sz);
+
+			if (i > 0) {
+				// Adjust left vertices if wall on the same plane and adjacent tiles
+				auto * pRay = &m_rays[idx+1];
+				if (i > 0 && pRay->face == ray->face && adjacentTiles(ray->tile, pRay->tile)) {
+					dPoints[0].y = pPoints[0].y; // bottom left
+					dPoints[3].y = pPoints[3].y; // top left
+				}
+
+				// Check next ray
+				if (i > m_rays.size() - 1) {
+					auto * nRay = &m_rays[idx-1];
+					if (nRay->face != ray->face && !adjacentTiles(ray->tile, nRay->tile)) {
+						// This is test code
+						
+						dPoints[0].y = pPoints[0].y; // bottom left
+						dPoints[3].y = pPoints[3].y; // top left
+					}
+				}
 			}
 
-			olc::vf2d sz{ (float)gEngine->gSettings->Camera.Scale, ray->projection };
+			// Check prev column, verify adjacent tile and set the left y vertices accordingly
+			// if (i > 0 && adjacentTiles(ray->tile, m_rays[idx+1].tile)) {
+			// 	dPoints[0].y = pPoints[0].y; // bottom left
+			// 	dPoints[3].y = pPoints[3].y; // top left
+			// }
+
+			// Check next column, verify adjacent tile, it's a left-side corner otherwise
+			// if (i < m_rays.size() - 1 && !adjacentTiles(ray->tile, m_rays[idx - 1].tile)) {
+			// 	auto cp = getProjectionCoords(&m_rays[idx - 1], i + 1);
+			// 	auto gl = getQuadVertices(cp[0], cp[1]);
+			// 	// dPoints[0].y = pPoints[0].y; // bottom left
+			// 	// dPoints[3].y = pPoints[3].y; // top left
+			// 	// dPoints[1].y = gl[1].y; // bottom right
+			// 	// dPoints[2].y = gl[2].y; // top right
+			// }
+
+			pPoints = getQuadVertices(wallPos, sz);
+			
 			float d = 1 / ray->depth * 3;
 			float alpha = (255 * d) / 255;
 			olc::Pixel col = olc::WHITE * alpha;
 
 			auto LOD = gEngine->getLod();
 
-			// Point smoothing
-			nPoints[0] = { wallPos.x, wallPos.y }; // top left
-			nPoints[1] = { wallPos.x, wallPos.y + sz.y }; // bottom left
-			nPoints[2] = { wallPos.x + sz.x, wallPos.y }; // top right
-			nPoints[3] = { wallPos.x + sz.x, wallPos.y + sz.y }; // bottom right
-
-			if (ray != m_rays.rbegin()) {
-				for (uint8_t i = 0; i < nPoints.size(); i++) {
-					nPoints[i] = pPoints[i].d_avg(nPoints[i]);
-				}
-			}
-
-			pPoints[0] = { wallPos.x, wallPos.y }; // top left
-			pPoints[1] = { wallPos.x, wallPos.y + sz.y }; // bottom left
-			pPoints[2] = { wallPos.x + sz.x, wallPos.y }; // top right
-			pPoints[3] = { wallPos.x + sz.x, wallPos.y + sz.y }; // bottom right
-
-			if (ray != m_rays.rbegin()) {
-				wallPos.x = pPoints[0].x;
-				wallPos.y = pPoints[0].y;
-			}
-			sz.x = pPoints[3].x - pPoints[0].x;
-			sz.y = pPoints[3].y - pPoints[0].y;
-
 			// Render textured walls
 			if (LOD.text == 2 || LOD.text == 3) {
-				// float scale = (float)T_SIZE / (float)dWall->sprite->width * (gEngine->gSettings->Window.HeightHalf / ray->projection);
 				float scale = 1;
 				float offX = (float)(i * gEngine->gSettings->Camera.Scale);
 				float offY = ray->tOffset;
@@ -212,23 +260,13 @@ void Raycaster::render(olc::PixelGameEngine* pge) {
 					return s / dw;
 				};
 				
-				// pge->DrawDecal(wallPos, dWall, {scale, scale});
 				pge->DrawPartialDecal(wallPos, dWall, {offX, 0-offY}, {(float)gEngine->gSettings->Camera.Scale, (float)ray->projection}, {scale, scale});
-				// pge->DrawPartialDecal(wallPos, dWall, {0, 0}, {(float)gEngine->gSettings->Camera.Scale, (float)ray->projection});
-				// std::vector<olc::vf2d> pts{wallPos, {wallPos.x, wallPos.y + sz.y}, {wallPos.x + sz.x, wallPos.y + sz.y}, {wallPos.x + sz.x, wallPos.y}};
-				// std::vector<olc::vf2d> pts{wallPos, {wallPos.x, wallPos.y + sz.y}, {wallPos.x + sz.x, wallPos.y + sz.y}, {wallPos.x + sz.x, wallPos.y}};
-				// std::array<olc::vf2d, 4> pos{wallPos, {wallPos.x, wallPos.y + sz.y}, {wallPos.x + sz.x, wallPos.y + sz.y}, {wallPos.x + sz.x, wallPos.y}};
-				// std::vector<olc::vf2d> uv;
-				// for (auto p : pts) uv.push_back({norm(p.x), norm(p.y)});
-
-				// pge->DrawPartialWarpedDecal(dWall, pos, {offX, offY}, {(float)gEngine->gSettings->Camera.Scale, (float)ray->projection});
-				// pge->DrawPolygonDecal(dWall, pts, uv);
 			} else {
-				
-
-				pge->FillRectDecal(wallPos, sz, col);
+				std::array<olc::Pixel, 4> cols = {{ olc::RED, olc::BLUE, olc::GREEN, olc::WHITE }};
+				pge->FillPolygonDecal(dPoints, cols);
+				// pge->FillPolygonDecal(dPoints, col);
+				// pge->FillRectDecal(wallPos, sz, col);
 			}
-			i++;
 		}
 	}
 }
@@ -236,4 +274,35 @@ void Raycaster::render(olc::PixelGameEngine* pge) {
 std::vector<Ray> Raycaster::getRaysToRender() {
 	std::vector<Ray> rays;
 	return rays;
+}
+
+std::array<olc::vf2d, 4> Raycaster::getQuadVertices(olc::vf2d dm, olc::vf2d sm) {
+	std::array<olc::vf2d, 4> verts = { {
+		{ dm.x, dm.y + sm.y }, // bottom left
+		{ dm.x + sm.x, dm.y + sm.y }, // bottom right
+		{ dm.x + sm.x, dm.y }, // top right
+		{ dm.x, dm.y } // top left
+	} };
+
+	return verts;
+}
+
+std::array<olc::vf2d, 2> Raycaster::getProjectionCoords(Ray * ray, int offset) {
+	olc::vf2d wallPos = { 0, 0 }, wallCol = { 0, 0 };
+	olc::vf2d sz{ (float)gEngine->gSettings->Camera.Scale, ray->projection };
+
+	if (ray->projection < gEngine->gSettings->Window.Height) {
+		wallPos = { (float)(offset * gEngine->gSettings->Camera.Scale), (float)(gEngine->gSettings->Window.HeightHalf - ray->projection / 2) };
+	}
+	else {
+		wallPos = { (float)(offset * gEngine->gSettings->Camera.Scale), 0 };
+	}
+
+	return std::array<olc::vf2d, 2>{{ wallPos, sz }};
+}
+
+bool Raycaster::adjacentTiles(olc::vi2d c1, olc::vi2d c2) {
+	olc::vi2d d = c1.diff_a(c2);
+	if (d.x > 1 || d.y > 1) return false;
+	return true;
 }

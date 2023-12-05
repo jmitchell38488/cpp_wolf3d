@@ -6,6 +6,10 @@
 
 class GameEngine;
 
+enum class RayFace {
+	TOP, BOTTOM, LEFT, RIGHT
+};
+
 struct Ray {
 	float dx;
 	float dy;
@@ -14,8 +18,10 @@ struct Ray {
 	float projection;
 	uint8_t texture;
 	float tOffset;
+	olc::vi2d tile;
+	RayFace face;
 
-	void update(float px, float py, float ang, float dep, float proj, uint8_t text, float off) {
+	void update(float px, float py, float ang, float dep, float proj, uint8_t text, float off, olc::vi2d t, RayFace f) {
 		dx = px;
 		dy = py;
 		angle = ang;
@@ -23,6 +29,8 @@ struct Ray {
 		projection = proj;
 		texture = text;
 		tOffset = off;
+		tile = t;
+		face = f;
 	}
 };
 
@@ -38,9 +46,12 @@ public:
 
 private:
 	void castRays(olc::vf2d coords, float fAngle);
-	float fRays = 0.0f;
+	std::array<olc::vf2d, 4> getQuadVertices(olc::vf2d dm, olc::vf2d sm);
+	std::array<olc::vf2d, 2> getProjectionCoords(Ray * ray, int offset);
+	bool adjacentTiles(olc::vi2d c1, olc::vi2d c2);
 
 private:
+	float fRays = 0.0f;
 	olc::Sprite * sWall = nullptr;
 	olc::Decal * dWall = nullptr;
 	GameEngine* gEngine = nullptr;

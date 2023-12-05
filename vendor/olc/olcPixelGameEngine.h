@@ -690,9 +690,12 @@ namespace olc
 		T dot(const v2d_generic& rhs) const { return this->x * rhs.x + this->y * rhs.y; }
 		T cross(const v2d_generic& rhs) const { return this->x * rhs.y - this->y * rhs.x; }
 		v2d_generic  avg(const v2d_generic& v1) { return { (x + v1.x) / 2, (y + v1.y) / 2 }; }
-		v2d_generic  diff(const v2d_generic& v1) { return { x > v1.x ? x - v1.x : v1.x - x, y > v1.y ? y - v1.y : v1.y - y }; }
+		// v2d_generic  avg(const v2d_generic& v1, const v2d_generic& v2) const { (v1.x + v2.x) / 2, (v1.y + v2.y) / 2 }; }
+		v2d_generic  diff(const v2d_generic& v1) { return { x - v1.x, y - v1.y }; }
+		// v2d_generic  diff(const v2d_generic& v1, const v2d_generic& v2) { return { v1.x > v2.x ? v1.x - v2.x : v2.x - v1.x, v1.y > v2.y ? v1.y - v2.y : v2.y - v1.y }; }
 		v2d_generic  diff_a(const v2d_generic& v1) { return { std::abs(x - v1.x), std::abs(y - v1.y) }; }
-		v2d_generic  d_avg(const v2d_generic& v1) { return avg(diff(v1)); }
+		v2d_generic  d_avg(const v2d_generic& v1) { return diff(v1) * 0.5; }
+		// v2d_generic  d_avg(const v2d_generic& v1, const v2d_generic& v2) { return diff(v1, v2) * 0.5; }
 		v2d_generic  operator +  (const v2d_generic& rhs) const { return v2d_generic(this->x + rhs.x, this->y + rhs.y); }
 		v2d_generic  operator -  (const v2d_generic& rhs) const { return v2d_generic(this->x - rhs.x, this->y - rhs.y); }
 		v2d_generic  operator *  (const T& rhs)           const { return v2d_generic(this->x * rhs, this->y * rhs); }
@@ -1153,6 +1156,9 @@ class Renderable
 		void FillRectDecal(const olc::vf2d& pos, const olc::vf2d& size, const olc::Pixel col = olc::WHITE);
 		// Draws a corner shaded rectangle as a decal
 		void GradientFillRectDecal(const olc::vf2d& pos, const olc::vf2d& size, const olc::Pixel colTL, const olc::Pixel colBL, const olc::Pixel colBR, const olc::Pixel colTR);
+		// Draws a single shaded filled polygon as a decal
+		void FillPolygonDecal(const std::array<olc::vf2d, 4>& pos, const olc::Pixel col = olc::WHITE);
+		void FillPolygonDecal(const std::array<olc::vf2d, 4>& pos, const std::array<olc::Pixel, 4> cols);
 		// Draws an arbitrary convex textured polygon using GPU
 		void DrawPolygonDecal(olc::Decal* decal, const std::vector<olc::vf2d>& pos, const std::vector<olc::vf2d>& uv, const olc::Pixel tint = olc::WHITE);
 		void DrawPolygonDecal(olc::Decal* decal, const std::vector<olc::vf2d>& pos, const std::vector<float>& depth, const std::vector<olc::vf2d>& uv, const olc::Pixel tint = olc::WHITE);
@@ -3135,6 +3141,16 @@ namespace olc
 		di.mode = nDecalMode;
 		di.structure = nDecalStructure;
 		vLayers[nTargetLayer].vecDecalInstance.push_back(di);
+	}
+
+	void PixelGameEngine::FillPolygonDecal(const std::array<olc::vf2d, 4>& pos, const olc::Pixel col) {
+		std::array<olc::Pixel, 4> cols = { {col, col, col, col} };
+		FillPolygonDecal(pos, cols);
+	}
+
+	void PixelGameEngine::FillPolygonDecal(const std::array<olc::vf2d, 4>& pos, const std::array<olc::Pixel, 4> cols) {
+		std::array<olc::vf2d, 4> uvs = { {{0,0},{0,0},{0,0},{0,0}} };
+		DrawExplicitDecal(nullptr, pos.data(), uvs.data(), cols.data(), 4);
 	}
 
 #ifdef OLC_ENABLE_EXPERIMENTAL
