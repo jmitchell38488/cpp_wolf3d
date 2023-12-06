@@ -194,49 +194,52 @@ void Raycaster::render(olc::PixelGameEngine* pge) {
 	if (gEngine->renderMode == GameRenderMode::PROJECTED) {
 		std::array<olc::vf2d, 4> pPoints, nPoints, dPoints;
 
-		for (int i = 0; i <= m_rays.size(); i++) {
-			int idx = m_rays.size() - i+1;
+		for (int i = 0; i < m_rays.size(); i++) {
+			int idx = m_rays.size() - (i+1);
 			auto * ray = &m_rays[idx];
 			auto coords = getProjectionCoords(ray, i);
 			auto wallPos = coords[0], sz = coords[1];
+			std::array<olc::Pixel, 4> cols = { { olc::RED, olc::BLUE, olc::GREEN, olc::WHITE } };
 
 			dPoints = getQuadVertices(wallPos, sz);
 
 			if (i > 0) {
 				// Adjust left vertices if wall on the same plane and adjacent tiles
 				auto * pRay = &m_rays[idx+1];
-				if (i > 0 && pRay->face == ray->face && adjacentTiles(ray->tile, pRay->tile)) {
+				if (pRay->face == ray->face && adjacentTiles(ray->tile, pRay->tile)) {
 					dPoints[0].y = pPoints[0].y; // bottom left
 					dPoints[3].y = pPoints[3].y; // top left
 				}
 
 				// Check next ray
-				if (i > m_rays.size() - 1) {
+				if (i < m_rays.size() - 2) {
 					auto * nRay = &m_rays[idx-1];
-					if (nRay->face != ray->face && !adjacentTiles(ray->tile, nRay->tile)) {
-						// This is test code
-						
-						dPoints[0].y = pPoints[0].y; // bottom left
-						dPoints[3].y = pPoints[3].y; // top left
+
+					auto nc = getProjectionCoords(nRay, i+1);
+					nPoints = getQuadVertices(nc[0], nc[1]);
+
+					// it's a hanging left edge, we need to smooth the left points by the next ray
+					if (pRay->face != ray->face || !adjacentTiles(ray->tile, pRay->tile)) {	
+						if (ray->face == nRay->face && adjacentTiles(ray->tile, nRay->tile)) {
+							auto d0 = dPoints[0].diff(nPoints[0]), d3 = dPoints[3].diff(nPoints[3]);
+							if (d0.y != 0) dPoints[0].y += d0.y;
+							if (d3.y != 0) dPoints[3].y += d3.y;
+						}
+					}
+
+					// it's a right edge probably into a corner, we need to smooth the right points by avg of the previous ray
+					if (ray->face != nRay->face || !adjacentTiles(ray->tile, nRay->tile)) {
+						if (ray->face == pRay->face && adjacentTiles(ray->tile, pRay->tile)) {
+							auto d1 = dPoints[1].d_avg(pPoints[1]), d2 = dPoints[2].d_avg(pPoints[2]);
+							// This is test code
+							cols[1] = olc::YELLOW;
+							cols[2] = olc::YELLOW;
+							if (d1.y != 0) dPoints[1].y += d1.y;
+							if (d2.y != 0) dPoints[2].y += d2.y;
+						}
 					}
 				}
 			}
-
-			// Check prev column, verify adjacent tile and set the left y vertices accordingly
-			// if (i > 0 && adjacentTiles(ray->tile, m_rays[idx+1].tile)) {
-			// 	dPoints[0].y = pPoints[0].y; // bottom left
-			// 	dPoints[3].y = pPoints[3].y; // top left
-			// }
-
-			// Check next column, verify adjacent tile, it's a left-side corner otherwise
-			// if (i < m_rays.size() - 1 && !adjacentTiles(ray->tile, m_rays[idx - 1].tile)) {
-			// 	auto cp = getProjectionCoords(&m_rays[idx - 1], i + 1);
-			// 	auto gl = getQuadVertices(cp[0], cp[1]);
-			// 	// dPoints[0].y = pPoints[0].y; // bottom left
-			// 	// dPoints[3].y = pPoints[3].y; // top left
-			// 	// dPoints[1].y = gl[1].y; // bottom right
-			// 	// dPoints[2].y = gl[2].y; // top right
-			// }
 
 			pPoints = getQuadVertices(wallPos, sz);
 			
@@ -262,7 +265,6 @@ void Raycaster::render(olc::PixelGameEngine* pge) {
 				
 				pge->DrawPartialDecal(wallPos, dWall, {offX, 0-offY}, {(float)gEngine->gSettings->Camera.Scale, (float)ray->projection}, {scale, scale});
 			} else {
-				std::array<olc::Pixel, 4> cols = {{ olc::RED, olc::BLUE, olc::GREEN, olc::WHITE }};
 				pge->FillPolygonDecal(dPoints, cols);
 				// pge->FillPolygonDecal(dPoints, col);
 				// pge->FillRectDecal(wallPos, sz, col);
