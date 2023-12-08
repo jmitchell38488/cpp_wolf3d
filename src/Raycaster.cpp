@@ -5,13 +5,13 @@
 #include "Settings.h"
 
 Raycaster::Raycaster() {
-	sWall = new olc::Sprite({(std::string) "./data/resources/textures/1a.png"});
+	sWall = new olc::Sprite({(std::string) "./data/resources/textures/1.jpg"});
 	dWall = new olc::Decal(sWall);
 	
 }
 
 Raycaster::Raycaster(GameEngine* engine) : gEngine(engine) {
-	sWall = new olc::Sprite({(std::string) "./data/resources/textures/1.png"});
+	sWall = new olc::Sprite({(std::string) "./data/resources/textures/1.jpg"});
 	dWall = new olc::Decal(sWall);
 }
 
@@ -231,9 +231,6 @@ void Raycaster::render(olc::PixelGameEngine* pge) {
 					if (ray->face != nRay->face || !adjacentTiles(ray->tile, nRay->tile)) {
 						if (ray->face == pRay->face && adjacentTiles(ray->tile, pRay->tile)) {
 							auto d1 = dPoints[1].d_avg(pPoints[1]), d2 = dPoints[2].d_avg(pPoints[2]);
-							// This is test code
-							cols[1] = olc::YELLOW;
-							cols[2] = olc::YELLOW;
 							if (d1.y != 0) dPoints[1].y += d1.y;
 							if (d2.y != 0) dPoints[2].y += d2.y;
 						}

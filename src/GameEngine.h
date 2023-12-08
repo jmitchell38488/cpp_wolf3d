@@ -49,7 +49,7 @@ protected:
 public:
 	bool bDrawRays = false;
 	bool bDrawPlayerVector = false;
-	GameRenderMode renderMode = GameRenderMode::TOP;
+	GameRenderMode renderMode = GameRenderMode::PROJECTED;
 
 public:
 	GameEngine();
