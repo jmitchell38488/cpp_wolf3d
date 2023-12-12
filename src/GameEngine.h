@@ -6,16 +6,16 @@
 
 #include "GameMap.h"
 #include "GamePlayer.h"
-#include "Raycaster.h"
+#include "Raycaster/Raycaster_Step.h"
+// #include "Raycaster_Factory.h"
 #include "ObjectRenderer.h"
 #include "Settings.h"
-
-
-#pragma once
 
 enum class GameRenderMode {
 	TOP, PROJECTED
 };
+
+class Raycaster;
 
 class GameEngine {
 private:
@@ -40,8 +40,8 @@ protected:
 	std::vector<olc::Pixel> pixels;
 	std::unique_ptr<GameMap> gMap = nullptr;
 	std::unique_ptr<GamePlayer> gPlayer = nullptr;
-	std::unique_ptr<Raycaster> gRaycaster = nullptr;
 	std::unique_ptr<ObjectRenderer> gObjRenderer = nullptr;
+	std::unique_ptr<Raycaster_Step> gRaycasterStep = nullptr;
 	olc::PixelGameEngine* pge = nullptr;
 	GameSettings* gSettings = nullptr;
 	uint8_t lod;
@@ -74,6 +74,8 @@ private:
 	friend class GamePlayer;
 	friend class Raycaster;
 	friend class ObjectRenderer;
+	friend class Raycaster_DDA;
+	friend class Raycaster_Step;
 };
 
 #endif // GAME_ENGINE

@@ -69,7 +69,7 @@ void GamePlayer::movement(float fElapsedTime) {
 			break;
 
 		case PlayerMovDir::STRLEFT:
-			dx += fCos;
+			dx += fCos; 
 			dy += -fSin;
 			break;
 

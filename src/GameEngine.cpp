@@ -2,7 +2,7 @@
 #include "Definitions.h"
 #include "GameMap.h"
 #include "GamePlayer.h"
-#include "Raycaster.h"
+#include "Raycaster/Raycaster_Step.h"
 #include "ObjectRenderer.h"
 #include "GameMap.h"
 #include "Settings.h"
@@ -239,7 +239,7 @@ void GameEngine::doGameUpdate(float fElapsedTime) {
 
 		if (!pge->IsConsoleShowing()) {
 			gPlayer->update(fElapsedTime, getPlayerMoveDir());
-			gRaycaster->update(fElapsedTime);
+			gRaycasterStep->update(fElapsedTime);
 		}
 
 		// Decrement timer
@@ -268,7 +268,7 @@ void GameEngine::resetGame() {
 bool GameEngine::initialise(olc::PixelGameEngine* engine) {
 	gMap = std::make_unique<GameMap>(initialise_map());
 	gPlayer = std::make_unique<GamePlayer>(this);
-	gRaycaster = std::make_unique<Raycaster>(this);
+	gRaycasterStep = std::make_unique<Raycaster_Step>(this);
 	gObjRenderer = std::make_unique<ObjectRenderer>(this);
 
 	pge = engine;
@@ -285,7 +285,7 @@ void GameEngine::render() {
 			pge->DrawRectDecal({ pos.x * GAME_GRID_PX_SIZE_X, pos.y * GAME_GRID_PX_SIZE_Y }, { GAME_GRID_PX_SIZE_X, GAME_GRID_PX_SIZE_Y }, px);
 	}
 
-	gRaycaster->render(pge);
+	gRaycasterStep->render(pge);
 	gPlayer->render(pge);
 
 	if (gSettings->Game.DebugMode) {

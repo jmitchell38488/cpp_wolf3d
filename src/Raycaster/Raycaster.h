@@ -44,13 +44,13 @@ public:
 	void render(olc::PixelGameEngine* pge);
 	std::vector<Ray> getRaysToRender();
 
-private:
+protected:
 	void castRays(olc::vf2d coords, float fAngle);
+	bool adjacentTiles(olc::vi2d c1, olc::vi2d c2);
 	std::array<olc::vf2d, 4> getQuadVertices(olc::vf2d dm, olc::vf2d sm);
 	std::array<olc::vf2d, 2> getProjectionCoords(Ray * ray, int offset);
-	bool adjacentTiles(olc::vi2d c1, olc::vi2d c2);
 
-private:
+protected:
 	float fRays = 0.0f;
 	olc::Sprite * sWall = nullptr;
 	olc::Decal * dWall = nullptr;

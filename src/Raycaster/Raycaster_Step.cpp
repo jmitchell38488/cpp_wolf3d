@@ -1,21 +1,20 @@
 #include <math.h> 
 #include "Raycaster.h"
-#include "Definitions.h"
-#include "GameEngine.h"
-#include "Settings.h"
+#include "Raycaster_Step.h"
+#include "../Definitions.h"
+#include "../GameEngine.h"
+#include "../Settings.h"
 
-Raycaster::Raycaster() {
-	sWall = new olc::Sprite({(std::string) "./data/resources/textures/1.jpg"});
-	dWall = new olc::Decal(sWall);
-	
+class GameEngine;
+class Raycaster;
+
+Raycaster_Step::Raycaster_Step(GameEngine* engine) : Raycaster::Raycaster(engine) {}
+
+void Raycaster_Step::update(float fElapsedTime) {
+	castRays(gEngine->gPlayer->posPlayer(), gEngine->gPlayer->playerAngle());
 }
 
-Raycaster::Raycaster(GameEngine* engine) : gEngine(engine) {
-	sWall = new olc::Sprite({(std::string) "./data/resources/textures/1.jpg"});
-	dWall = new olc::Decal(sWall);
-}
-
-void Raycaster::castRays(olc::vf2d coords, float fAngle) {
+void Raycaster_Step::castRays(olc::vf2d coords, float fAngle) {
 	// Rays could have been updated in the last cycle by console command
 	if (fRays != (int)gEngine->gSettings->Camera.Rays) {
 		fRays = (int)gEngine->gSettings->Camera.Rays;
@@ -168,11 +167,7 @@ void Raycaster::castRays(olc::vf2d coords, float fAngle) {
 	}
 }
 
-void Raycaster::update(float fElapsedTime) {
-	castRays(gEngine->gPlayer->posPlayer(), gEngine->gPlayer->playerAngle());
-}
-
-void Raycaster::render(olc::PixelGameEngine* pge) {
+void Raycaster_Step::render(olc::PixelGameEngine* pge) {
 	auto coords = gEngine->gPlayer->posPlayer();
 	if (gEngine->renderMode == GameRenderMode::TOP) {
 		// Render rays
@@ -246,47 +241,18 @@ void Raycaster::render(olc::PixelGameEngine* pge) {
 
 			auto LOD = gEngine->getLod();
 
-			// Render textured walls
-			if (LOD.text == 2 || LOD.text == 3) {
-				float scale = 1;
-				float offX = (float)(i * gEngine->gSettings->Camera.Scale);
-				float offY = ray->tOffset;
-
-				const float dw = T_SIZE;
-
-				auto norm = [dw](float s){
-					if (s > dw) return dw;
-					if (s < 0) return 0.0f;
-					return s / dw;
-				};
-				
-				pge->DrawPartialDecal(wallPos, dWall, {offX, 0-offY}, {(float)gEngine->gSettings->Camera.Scale, (float)ray->projection}, {scale, scale});
-			} else {
-				pge->FillPolygonDecal(dPoints, cols);
-				// pge->FillPolygonDecal(dPoints, col);
-				// pge->FillRectDecal(wallPos, sz, col);
+			std::vector<olc::vf2d> pos, uv;
+			for (auto vt : dPoints) {
+				pos.push_back(vt);
+				uv.push_back({1,1});
 			}
+
+			pge->DrawPolygonDecal(dWall, pos, uv, olc::WHITE);
 		}
 	}
 }
 
-std::vector<Ray> Raycaster::getRaysToRender() {
-	std::vector<Ray> rays;
-	return rays;
-}
-
-std::array<olc::vf2d, 4> Raycaster::getQuadVertices(olc::vf2d dm, olc::vf2d sm) {
-	std::array<olc::vf2d, 4> verts = { {
-		{ dm.x, dm.y + sm.y }, // bottom left
-		{ dm.x + sm.x, dm.y + sm.y }, // bottom right
-		{ dm.x + sm.x, dm.y }, // top right
-		{ dm.x, dm.y } // top left
-	} };
-
-	return verts;
-}
-
-std::array<olc::vf2d, 2> Raycaster::getProjectionCoords(Ray * ray, int offset) {
+std::array<olc::vf2d, 2> Raycaster_Step::getProjectionCoords(Ray * ray, int offset) {
 	olc::vf2d wallPos = { 0, 0 }, wallCol = { 0, 0 };
 	olc::vf2d sz{ (float)gEngine->gSettings->Camera.Scale, ray->projection };
 
@@ -298,10 +264,4 @@ std::array<olc::vf2d, 2> Raycaster::getProjectionCoords(Ray * ray, int offset) {
 	}
 
 	return std::array<olc::vf2d, 2>{{ wallPos, sz }};
-}
-
-bool Raycaster::adjacentTiles(olc::vi2d c1, olc::vi2d c2) {
-	olc::vi2d d = c1.diff_a(c2);
-	if (d.x > 1 || d.y > 1) return false;
-	return true;
 }
